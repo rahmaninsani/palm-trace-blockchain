@@ -1,0 +1,547 @@
+version: "2.2"
+
+networks:
+  basic:
+
+services:
+  ca.orderer.palmsafe.com:
+    container_name: ca.orderer.palmsafe.com
+    image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.orderer.palmsafe.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.orderer.palmsafe.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+    ports:
+      - 7020:7054
+    working_dir: /etc/hyperledger/fabric-ca-server
+    command: sh -c 'fabric-ca-server start -b ${PALMSAFEORDERER_CA_ADMIN_NAME}:${PALMSAFEORDERER_CA_ADMIN_PASSWORD} -d'
+    volumes:
+      - ../fabric-config/crypto-config/peerOrganizations/orderer.palmsafe.com/ca/:/etc/hyperledger/fabric-ca-server/crypto
+      - ../fabric-config/fabric-ca-server-config/orderer.palmsafe.com/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    networks:
+      - basic
+
+  cli.orderer.palmsafe.com:
+    container_name: cli.orderer.palmsafe.com
+    image: hyperledger/fabric-tools:${FABRIC_VERSION}
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      - CORE_PEER_ID=cli.orderer.palmsafe.com
+      - CORE_CHAINCODE_KEEPALIVE=10
+      #
+      - CORE_PEER_LOCALMSPID=PalmSafeOrdererMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/cli/crypto/users/Admin@orderer.palmsafe.com/msp
+    working_dir: /var/hyperledger/cli/
+    command: /bin/bash
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-docker/scripts/cli:/var/hyperledger/cli/scripts/
+      - ../fabric-config/config:/var/hyperledger/cli/config/ # genesis.block and channel.tx's
+      - ../fabric-config/crypto-config/peerOrganizations/orderer.palmsafe.com:/var/hyperledger/cli/crypto/
+      - ../fabric-config/chaincode-packages:/var/hyperledger/cli/chaincode-packages/
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/referensi-harga-chaincode/"
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/transaksi-chaincode/"
+    networks:
+      - basic
+
+  orderer0.palmsafe-orderer-group.orderer.palmsafe.com:
+    container_name: orderer0.palmsafe-orderer-group.orderer.palmsafe.com
+    image: hyperledger/fabric-orderer:${FABRIC_VERSION}
+    environment:
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7030
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_BOOTSTRAPFILE=/var/hyperledger/config/Palmsafe-orderer-groupGenesis.block
+      - ORDERER_GENERAL_LOCALMSPID=PalmSafeOrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - GODEBUG=netdns=go
+    working_dir: /var/hyperledger/orderer
+    command: orderer
+    ports:
+      - 7030:7030
+      - 8030:9440
+    volumes:
+      - ../fabric-config/config/:/var/hyperledger/config
+      - ../fabric-config/crypto-config/peerOrganizations/orderer.palmsafe.com/peers/orderer0.palmsafe-orderer-group.orderer.palmsafe.com/msp/:/var/hyperledger/orderer/msp
+      - ../fabric-config/crypto-config/peerOrganizations/orderer.palmsafe.com/peers/orderer0.palmsafe-orderer-group.orderer.palmsafe.com/tls/:/var/hyperledger/orderer/tls
+    networks:
+      - basic
+
+  ca.petani.palmsafe.com:
+    container_name: ca.petani.palmsafe.com
+    image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.petani.palmsafe.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.petani.palmsafe.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+    ports:
+      - 7040:7054
+    working_dir: /etc/hyperledger/fabric-ca-server
+    command: sh -c 'fabric-ca-server start -b ${PETANI_CA_ADMIN_NAME}:${PETANI_CA_ADMIN_PASSWORD} -d'
+    volumes:
+      - ../fabric-config/crypto-config/peerOrganizations/petani.palmsafe.com/ca/:/etc/hyperledger/fabric-ca-server/crypto
+      - ../fabric-config/fabric-ca-server-config/petani.palmsafe.com/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    networks:
+      - basic
+
+  cli.petani.palmsafe.com:
+    container_name: cli.petani.palmsafe.com
+    image: hyperledger/fabric-tools:${FABRIC_VERSION}
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      - CORE_PEER_ID=cli.petani.palmsafe.com
+      - CORE_CHAINCODE_KEEPALIVE=10
+      #
+      - CORE_PEER_LOCALMSPID=PetaniMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/cli/crypto/users/Admin@petani.palmsafe.com/msp
+      - CORE_PEER_ADDRESS=peer0.petani.palmsafe.com:7041
+    working_dir: /var/hyperledger/cli/
+    command: /bin/bash
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-docker/scripts/cli:/var/hyperledger/cli/scripts/
+      - ../fabric-config/config:/var/hyperledger/cli/config/ # genesis.block and channel.tx's
+      - ../fabric-config/crypto-config/peerOrganizations/petani.palmsafe.com:/var/hyperledger/cli/crypto/
+      - ../fabric-config/chaincode-packages:/var/hyperledger/cli/chaincode-packages/
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/referensi-harga-chaincode/"
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/transaksi-chaincode/"
+    networks:
+      - basic
+
+  peer0.petani.palmsafe.com:
+    container_name: peer0.petani.palmsafe.com
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    environment:
+      - CORE_PEER_LOCALMSPID=PetaniMSP
+      - CORE_PEER_ID=peer0.petani.palmsafe.com
+      - CORE_PEER_ADDRESS=peer0.petani.palmsafe.com:7041
+      - CORE_PEER_LISTENADDRESS=peer0.petani.palmsafe.com:7041
+      - CORE_PEER_GOSSIP_ENDPOINT=peer0.petani.palmsafe.com:7041
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.petani.palmsafe.com:7041
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.petani.palmsafe.com:7041
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.petani.palmsafe.com:7050
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/peer/msp
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:${FABRIC_CCENV_VERSION}
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:${FABRIC_BASEOS_VERSION}
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:${FABRIC_JAVAENV_VERSION}
+      #
+      - CORE_CHAINCODE_LOGGING_LEVEL=${LOGGING_LEVEL}
+      - CORE_CHAINCODE_LOGGING_SHIM=${LOGGING_LEVEL}
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      # metrics
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.petani.palmsafe.com:9440
+      - CORE_METRICS_PROVIDER=prometheus
+      #
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - GODEBUG=netdns=go
+      # CouchDB
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.petani.palmsafe.com:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=peer0Password
+      # enabled gateway
+      - CORE_PEER_GATEWAY_ENABLED=true
+    working_dir: /etc/hyperledger/fabric/peer/
+    command: peer node start --peer-chaincodedev=true
+    ports:
+      - 8041:9440
+      - 7041:7041
+      - 8541:7050
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-config/crypto-config/peerOrganizations/petani.palmsafe.com/peers/peer0.petani.palmsafe.com/msp:/etc/hyperledger/fabric/peer/msp
+      - ../fabric-config/crypto-config/peerOrganizations/petani.palmsafe.com/peers/peer0.petani.palmsafe.com/tls:/etc/hyperledger/fabric/peer/tls
+      - ../fabric-config/crypto-config/peerOrganizations/petani.palmsafe.com/users:/etc/hyperledger/fabric/peer/msp/users
+      - ../fabric-config/config:/etc/hyperledger/fabric/config
+    networks:
+      - basic
+
+  couchdb.peer0.petani.palmsafe.com:
+    container_name: couchdb.peer0.petani.palmsafe.com
+    image: couchdb:${COUCHDB_VERSION}
+    environment:
+      - COUCHDB_USER=peer0
+      - COUCHDB_PASSWORD=peer0Password
+    ports:
+      - 5100:5984
+    networks:
+      - basic
+
+  ca.koperasi.palmsafe.com:
+    container_name: ca.koperasi.palmsafe.com
+    image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.koperasi.palmsafe.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.koperasi.palmsafe.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+    ports:
+      - 7060:7054
+    working_dir: /etc/hyperledger/fabric-ca-server
+    command: sh -c 'fabric-ca-server start -b ${KOPERASI_CA_ADMIN_NAME}:${KOPERASI_CA_ADMIN_PASSWORD} -d'
+    volumes:
+      - ../fabric-config/crypto-config/peerOrganizations/koperasi.palmsafe.com/ca/:/etc/hyperledger/fabric-ca-server/crypto
+      - ../fabric-config/fabric-ca-server-config/koperasi.palmsafe.com/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    networks:
+      - basic
+
+  cli.koperasi.palmsafe.com:
+    container_name: cli.koperasi.palmsafe.com
+    image: hyperledger/fabric-tools:${FABRIC_VERSION}
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      - CORE_PEER_ID=cli.koperasi.palmsafe.com
+      - CORE_CHAINCODE_KEEPALIVE=10
+      #
+      - CORE_PEER_LOCALMSPID=KoperasiMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/cli/crypto/users/Admin@koperasi.palmsafe.com/msp
+      - CORE_PEER_ADDRESS=peer0.koperasi.palmsafe.com:7061
+    working_dir: /var/hyperledger/cli/
+    command: /bin/bash
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-docker/scripts/cli:/var/hyperledger/cli/scripts/
+      - ../fabric-config/config:/var/hyperledger/cli/config/ # genesis.block and channel.tx's
+      - ../fabric-config/crypto-config/peerOrganizations/koperasi.palmsafe.com:/var/hyperledger/cli/crypto/
+      - ../fabric-config/chaincode-packages:/var/hyperledger/cli/chaincode-packages/
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/referensi-harga-chaincode/"
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/transaksi-chaincode/"
+    networks:
+      - basic
+
+  peer0.koperasi.palmsafe.com:
+    container_name: peer0.koperasi.palmsafe.com
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    environment:
+      - CORE_PEER_LOCALMSPID=KoperasiMSP
+      - CORE_PEER_ID=peer0.koperasi.palmsafe.com
+      - CORE_PEER_ADDRESS=peer0.koperasi.palmsafe.com:7061
+      - CORE_PEER_LISTENADDRESS=peer0.koperasi.palmsafe.com:7061
+      - CORE_PEER_GOSSIP_ENDPOINT=peer0.koperasi.palmsafe.com:7061
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.koperasi.palmsafe.com:7061
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.koperasi.palmsafe.com:7061
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.koperasi.palmsafe.com:7050
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/peer/msp
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:${FABRIC_CCENV_VERSION}
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:${FABRIC_BASEOS_VERSION}
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:${FABRIC_JAVAENV_VERSION}
+      #
+      - CORE_CHAINCODE_LOGGING_LEVEL=${LOGGING_LEVEL}
+      - CORE_CHAINCODE_LOGGING_SHIM=${LOGGING_LEVEL}
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      # metrics
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.koperasi.palmsafe.com:9440
+      - CORE_METRICS_PROVIDER=prometheus
+      #
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - GODEBUG=netdns=go
+      # CouchDB
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.koperasi.palmsafe.com:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=peer0Password
+      # enabled gateway
+      - CORE_PEER_GATEWAY_ENABLED=true
+    working_dir: /etc/hyperledger/fabric/peer/
+    command: peer node start --peer-chaincodedev=true
+    ports:
+      - 8061:9440
+      - 7061:7061
+      - 8561:7050
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-config/crypto-config/peerOrganizations/koperasi.palmsafe.com/peers/peer0.koperasi.palmsafe.com/msp:/etc/hyperledger/fabric/peer/msp
+      - ../fabric-config/crypto-config/peerOrganizations/koperasi.palmsafe.com/peers/peer0.koperasi.palmsafe.com/tls:/etc/hyperledger/fabric/peer/tls
+      - ../fabric-config/crypto-config/peerOrganizations/koperasi.palmsafe.com/users:/etc/hyperledger/fabric/peer/msp/users
+      - ../fabric-config/config:/etc/hyperledger/fabric/config
+    networks:
+      - basic
+
+  couchdb.peer0.koperasi.palmsafe.com:
+    container_name: couchdb.peer0.koperasi.palmsafe.com
+    image: couchdb:${COUCHDB_VERSION}
+    environment:
+      - COUCHDB_USER=peer0
+      - COUCHDB_PASSWORD=peer0Password
+    ports:
+      - 5120:5984
+    networks:
+      - basic
+
+  ca.pks.palmsafe.com:
+    container_name: ca.pks.palmsafe.com
+    image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.pks.palmsafe.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.pks.palmsafe.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+    ports:
+      - 7080:7054
+    working_dir: /etc/hyperledger/fabric-ca-server
+    command: sh -c 'fabric-ca-server start -b ${PABRIKKELAPASAWIT_CA_ADMIN_NAME}:${PABRIKKELAPASAWIT_CA_ADMIN_PASSWORD} -d'
+    volumes:
+      - ../fabric-config/crypto-config/peerOrganizations/pks.palmsafe.com/ca/:/etc/hyperledger/fabric-ca-server/crypto
+      - ../fabric-config/fabric-ca-server-config/pks.palmsafe.com/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    networks:
+      - basic
+
+  cli.pks.palmsafe.com:
+    container_name: cli.pks.palmsafe.com
+    image: hyperledger/fabric-tools:${FABRIC_VERSION}
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      - CORE_PEER_ID=cli.pks.palmsafe.com
+      - CORE_CHAINCODE_KEEPALIVE=10
+      #
+      - CORE_PEER_LOCALMSPID=PabrikKelapaSawitMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/cli/crypto/users/Admin@pks.palmsafe.com/msp
+      - CORE_PEER_ADDRESS=peer0.pks.palmsafe.com:7081
+    working_dir: /var/hyperledger/cli/
+    command: /bin/bash
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-docker/scripts/cli:/var/hyperledger/cli/scripts/
+      - ../fabric-config/config:/var/hyperledger/cli/config/ # genesis.block and channel.tx's
+      - ../fabric-config/crypto-config/peerOrganizations/pks.palmsafe.com:/var/hyperledger/cli/crypto/
+      - ../fabric-config/chaincode-packages:/var/hyperledger/cli/chaincode-packages/
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/referensi-harga-chaincode/"
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/transaksi-chaincode/"
+    networks:
+      - basic
+
+  peer0.pks.palmsafe.com:
+    container_name: peer0.pks.palmsafe.com
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    environment:
+      - CORE_PEER_LOCALMSPID=PabrikKelapaSawitMSP
+      - CORE_PEER_ID=peer0.pks.palmsafe.com
+      - CORE_PEER_ADDRESS=peer0.pks.palmsafe.com:7081
+      - CORE_PEER_LISTENADDRESS=peer0.pks.palmsafe.com:7081
+      - CORE_PEER_GOSSIP_ENDPOINT=peer0.pks.palmsafe.com:7081
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.pks.palmsafe.com:7081
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.pks.palmsafe.com:7081
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.pks.palmsafe.com:7050
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/peer/msp
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:${FABRIC_CCENV_VERSION}
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:${FABRIC_BASEOS_VERSION}
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:${FABRIC_JAVAENV_VERSION}
+      #
+      - CORE_CHAINCODE_LOGGING_LEVEL=${LOGGING_LEVEL}
+      - CORE_CHAINCODE_LOGGING_SHIM=${LOGGING_LEVEL}
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      # metrics
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.pks.palmsafe.com:9440
+      - CORE_METRICS_PROVIDER=prometheus
+      #
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - GODEBUG=netdns=go
+      # CouchDB
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.pks.palmsafe.com:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=peer0Password
+      # enabled gateway
+      - CORE_PEER_GATEWAY_ENABLED=true
+    working_dir: /etc/hyperledger/fabric/peer/
+    command: peer node start --peer-chaincodedev=true
+    ports:
+      - 8081:9440
+      - 7081:7081
+      - 8581:7050
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-config/crypto-config/peerOrganizations/pks.palmsafe.com/peers/peer0.pks.palmsafe.com/msp:/etc/hyperledger/fabric/peer/msp
+      - ../fabric-config/crypto-config/peerOrganizations/pks.palmsafe.com/peers/peer0.pks.palmsafe.com/tls:/etc/hyperledger/fabric/peer/tls
+      - ../fabric-config/crypto-config/peerOrganizations/pks.palmsafe.com/users:/etc/hyperledger/fabric/peer/msp/users
+      - ../fabric-config/config:/etc/hyperledger/fabric/config
+    networks:
+      - basic
+
+  couchdb.peer0.pks.palmsafe.com:
+    container_name: couchdb.peer0.pks.palmsafe.com
+    image: couchdb:${COUCHDB_VERSION}
+    environment:
+      - COUCHDB_USER=peer0
+      - COUCHDB_PASSWORD=peer0Password
+    ports:
+      - 5140:5984
+    networks:
+      - basic
+
+  ca.dinas.palmsafe.com:
+    container_name: ca.dinas.palmsafe.com
+    image: hyperledger/fabric-ca:${FABRIC_CA_VERSION}
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.dinas.palmsafe.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/crypto/ca.dinas.palmsafe.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server/crypto/priv-key.pem
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+    ports:
+      - 7100:7054
+    working_dir: /etc/hyperledger/fabric-ca-server
+    command: sh -c 'fabric-ca-server start -b ${DINAS_CA_ADMIN_NAME}:${DINAS_CA_ADMIN_PASSWORD} -d'
+    volumes:
+      - ../fabric-config/crypto-config/peerOrganizations/dinas.palmsafe.com/ca/:/etc/hyperledger/fabric-ca-server/crypto
+      - ../fabric-config/fabric-ca-server-config/dinas.palmsafe.com/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    networks:
+      - basic
+
+  cli.dinas.palmsafe.com:
+    container_name: cli.dinas.palmsafe.com
+    image: hyperledger/fabric-tools:${FABRIC_VERSION}
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      - CORE_PEER_ID=cli.dinas.palmsafe.com
+      - CORE_CHAINCODE_KEEPALIVE=10
+      #
+      - CORE_PEER_LOCALMSPID=DinasMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/cli/crypto/users/Admin@dinas.palmsafe.com/msp
+      - CORE_PEER_ADDRESS=peer0.dinas.palmsafe.com:7101
+    working_dir: /var/hyperledger/cli/
+    command: /bin/bash
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-docker/scripts/cli:/var/hyperledger/cli/scripts/
+      - ../fabric-config/config:/var/hyperledger/cli/config/ # genesis.block and channel.tx's
+      - ../fabric-config/crypto-config/peerOrganizations/dinas.palmsafe.com:/var/hyperledger/cli/crypto/
+      - ../fabric-config/chaincode-packages:/var/hyperledger/cli/chaincode-packages/
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/referensi-harga-chaincode/"
+      - "$CHAINCODES_BASE_DIR/./chaincodes/chaincode-kv-node/:/var/hyperledger/cli/transaksi-chaincode/"
+    networks:
+      - basic
+
+  peer0.dinas.palmsafe.com:
+    container_name: peer0.dinas.palmsafe.com
+    image: hyperledger/fabric-peer:${FABRIC_VERSION}
+    environment:
+      - CORE_PEER_LOCALMSPID=DinasMSP
+      - CORE_PEER_ID=peer0.dinas.palmsafe.com
+      - CORE_PEER_ADDRESS=peer0.dinas.palmsafe.com:7101
+      - CORE_PEER_LISTENADDRESS=peer0.dinas.palmsafe.com:7101
+      - CORE_PEER_GOSSIP_ENDPOINT=peer0.dinas.palmsafe.com:7101
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.dinas.palmsafe.com:7101
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.dinas.palmsafe.com:7101
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.dinas.palmsafe.com:7050
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/peer/msp
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:${FABRIC_CCENV_VERSION}
+      - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:${FABRIC_BASEOS_VERSION}
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:${FABRIC_JAVAENV_VERSION}
+      #
+      - CORE_CHAINCODE_LOGGING_LEVEL=${LOGGING_LEVEL}
+      - CORE_CHAINCODE_LOGGING_SHIM=${LOGGING_LEVEL}
+      - FABRIC_LOGGING_SPEC=${LOGGING_LEVEL}
+      # metrics
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.dinas.palmsafe.com:9440
+      - CORE_METRICS_PROVIDER=prometheus
+      #
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - GODEBUG=netdns=go
+      # CouchDB
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.dinas.palmsafe.com:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=peer0
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=peer0Password
+      # enabled gateway
+      - CORE_PEER_GATEWAY_ENABLED=true
+    working_dir: /etc/hyperledger/fabric/peer/
+    command: peer node start --peer-chaincodedev=true
+    ports:
+      - 8101:9440
+      - 7101:7101
+      - 8601:7050
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../fabric-config/crypto-config/peerOrganizations/dinas.palmsafe.com/peers/peer0.dinas.palmsafe.com/msp:/etc/hyperledger/fabric/peer/msp
+      - ../fabric-config/crypto-config/peerOrganizations/dinas.palmsafe.com/peers/peer0.dinas.palmsafe.com/tls:/etc/hyperledger/fabric/peer/tls
+      - ../fabric-config/crypto-config/peerOrganizations/dinas.palmsafe.com/users:/etc/hyperledger/fabric/peer/msp/users
+      - ../fabric-config/config:/etc/hyperledger/fabric/config
+    networks:
+      - basic
+
+  couchdb.peer0.dinas.palmsafe.com:
+    container_name: couchdb.peer0.dinas.palmsafe.com
+    image: couchdb:${COUCHDB_VERSION}
+    environment:
+      - COUCHDB_USER=peer0
+      - COUCHDB_PASSWORD=peer0Password
+    ports:
+      - 5160:5984
+    networks:
+      - basic
+
+  # Change from hyperledger/explorer-db to rahmaninsani/explorer-db
+  db.explorer.example.com:
+    image: rahmaninsani/explorer-db:${HYPERLEDGER_EXPLORER_VERSION}
+    container_name: db.explorer.example.com
+    environment:
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=password
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 5s
+      timeout: 10s
+      retries: 7
+    volumes:
+      - /var/lib/postgresql/data
+    networks:
+      - basic
+
+  # Change from hyperledger/explorer to rahmaninsani/explorer
+  explorer.example.com:
+    image: rahmaninsani/explorer:${HYPERLEDGER_EXPLORER_VERSION}
+    restart: on-failure:8
+    container_name: explorer.example.com
+    environment:
+      - DATABASE_HOST=db.explorer.example.com
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWD=password
+      - LOG_LEVEL_APP=debug
+      - LOG_LEVEL_DB=debug
+      - LOG_LEVEL_CONSOLE=info
+      - LOG_CONSOLE_STDOUT=true
+      - DISCOVERY_AS_LOCALHOST=false
+    volumes:
+      - ../fabric-config/explorer/config-global.json:/opt/explorer/app/platform/fabric/config.json
+      - ../fabric-config/explorer:/opt/explorer/app/platform/fabric/connection-profile
+      - ../fabric-config/crypto-config:/tmp/crypto
+    ports:
+      - "7010:8080"
+    depends_on:
+      db.explorer.example.com:
+        condition: service_healthy
+    networks:
+      - basic
