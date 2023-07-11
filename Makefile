@@ -11,3 +11,5 @@ fablo-download:
 fablo-privilege:
 	@sudo chmod +x ./fablo
 
+generate-env:
+	@python3 generate_env_file.py
