@@ -3,7 +3,7 @@
   "global": {
     "fabricVersion": "2.4.3",
     "tls": false,
-    "peerDevMode": true,
+    "peerDevMode": false,
     "tools": {
       "explorer": true
     }
@@ -107,16 +107,16 @@
     {
       "name": "referensi-harga-chaincode",
       "version": "0.0.1",
-      "lang": "node",
+      "lang": "golang",
       "channel": "referensi-harga-channel",
-      "directory": "./chaincodes/chaincode-kv-node"
+      "directory": "./chaincodes/asset-transaksi"
     },
     {
       "name": "transaksi-chaincode",
       "version": "0.0.1",
-      "lang": "node",
+      "lang": "golang",
       "channel": "transaksi-channel",
-      "directory": "./chaincodes/chaincode-kv-node"
+      "directory": "./chaincodes/asset-transaksi"
     }
   ],
   "hooks": {
