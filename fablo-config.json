@@ -11,12 +11,12 @@
   "orgs": [
     {
       "organization": {
-        "name": "Orderer",
-        "domain": "orderer.example.com"
+        "name": "PalmSafeOrderer",
+        "domain": "orderer.palmsafe.com"
       },
       "orderers": [
         {
-          "groupName": "group1",
+          "groupName": "palmsafe-orderer-group",
           "type": "solo",
           "instances": 1
         }
@@ -24,8 +24,38 @@
     },
     {
       "organization": {
-        "name": "Org1",
-        "domain": "org1.example.com"
+        "name": "Petani",
+        "domain": "petani.palmsafe.com"
+      },
+      "peer": {
+        "instances": 1,
+        "db": "CouchDb"
+      }
+    },
+    {
+      "organization": {
+        "name": "Koperasi",
+        "domain": "koperasi.palmsafe.com"
+      },
+      "peer": {
+        "instances": 1,
+        "db": "CouchDb"
+      }
+    },
+    {
+      "organization": {
+        "name": "PabrikKelapaSawit",
+        "domain": "pks.palmsafe.com"
+      },
+      "peer": {
+        "instances": 1,
+        "db": "CouchDb"
+      }
+    },
+    {
+      "organization": {
+        "name": "Dinas",
+        "domain": "dinas.palmsafe.com"
       },
       "peer": {
         "instances": 1,
@@ -35,10 +65,39 @@
   ],
   "channels": [
     {
-      "name": "my-channel1",
+      "name": "referensi-harga-channel",
       "orgs": [
         {
-          "name": "Org1",
+          "name": "Dinas",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "PabrikKelapaSawit",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "Koperasi",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "Petani",
+          "peers": ["peer0"]
+        }
+      ]
+    },
+    {
+      "name": "transaksi-channel",
+      "orgs": [
+        {
+          "name": "PabrikKelapaSawit",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "Koperasi",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "Petani",
           "peers": ["peer0"]
         }
       ]
@@ -46,10 +105,17 @@
   ],
   "chaincodes": [
     {
-      "name": "chaincode1",
+      "name": "referensi-harga-chaincode",
       "version": "0.0.1",
       "lang": "node",
-      "channel": "my-channel1",
+      "channel": "referensi-harga-channel",
+      "directory": "./chaincodes/chaincode-kv-node"
+    },
+    {
+      "name": "transaksi-chaincode",
+      "version": "0.0.1",
+      "lang": "node",
+      "channel": "transaksi-channel",
       "directory": "./chaincodes/chaincode-kv-node"
     }
   ]
