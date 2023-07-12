@@ -1,49 +1,53 @@
 import json
 
-fablo_dict = json.load(open('./fablo-config.json', 'r'))
+fablo_dict = json.load(open("./fablo-config.json", "r"))
 json_config_file = {
     "port": 3000,
     "orgs": {},
     "channels": {},
-    "chaincodes": fablo_dict['chaincodes']
+    "chaincodes": fablo_dict["chaincodes"],
 }
 
 # Add orgs
-for i in fablo_dict['orgs']:
-    org_name = i['organization']['name']
-    domain = i['organization']['domain']
+for i in fablo_dict["orgs"]:
+    org_name = i["organization"]["name"]
+    domain = i["organization"]["domain"]
 
     connectionProfile = json.load(
         open(
-            f'./fablo-target/fabric-config/connection-profiles/connection-profile-{org_name.lower()}.json',
-            'r'
+            f"./fablo-target/fabric-config/connection-profiles/connection-profile-{org_name.lower()}.json",
+            "r",
         )
     )
 
+    connectionProfile["certificateAuthorities"]["ca." + domain]["tlsCACerts"] = str(
+        open(
+            f"./fablo-target/fabric-config/crypto-config/peerOrganizations/{domain}/tlsca/tlsca.{domain}-cert.pem",
+            "r",
+        ).read()
+    )
+
     certificate = open(
-        f'./fablo-target/fabric-config/crypto-config/peerOrganizations/{domain}/users/User1@{domain}/msp/signcerts/User1@{domain}-cert.pem',
-        'r'
+        f"./fablo-target/fabric-config/crypto-config/peerOrganizations/{domain}/users/User1@{domain}/msp/signcerts/User1@{domain}-cert.pem",
+        "r",
     )
 
     privateKey = open(
-        f'./fablo-target/fabric-config/crypto-config/peerOrganizations/{domain}/users/User1@{domain}/msp/keystore/priv-key.pem',
-        'r'
+        f"./fablo-target/fabric-config/crypto-config/peerOrganizations/{domain}/users/User1@{domain}/msp/keystore/priv-key.pem",
+        "r",
     )
 
-    json_config_file['orgs'][org_name] = {
-        "msp": i['organization']['name'] + "MSP",
+    json_config_file["orgs"][org_name] = {
+        "msp": i["organization"]["name"] + "MSP",
         "connectionProfile": json.dumps(connectionProfile),
         "certificate": str(certificate.read()),
-        "privateKey": str(privateKey.read())
+        "privateKey": str(privateKey.read()),
     }
 
 # Add channels
-for i in fablo_dict['channels']:
-    json_config_file['channels'][i['name']] = {
-        "acceptOrgs": [
-            j['name']
-            for j in i['orgs']
-        ]
+for i in fablo_dict["channels"]:
+    json_config_file["channels"][i["name"]] = {
+        "acceptOrgs": [j["name"] for j in i["orgs"]]
     }
 
 # Saving env file
