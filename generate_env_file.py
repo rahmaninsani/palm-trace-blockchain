@@ -26,7 +26,7 @@ for index, org in enumerate(fablo_dict["orgs"]):
         )
     )
 
-    connectionProfile["certificateAuthorities"]["ca." + domain]["tlsCACerts"] = str(
+    connectionProfile["certificateAuthorities"]["ca.{}".format(domain)]["tlsCACerts"] = str(
         open(
             f"./fablo-target/fabric-config/crypto-config/peerOrganizations/{domain}/tlsca/tlsca.{domain}-cert.pem",
             "r",
@@ -66,5 +66,5 @@ for channel in fablo_dict["channels"]:
     }
 
 # Saving env file
-with open("./env.json", "w") as outfile:
+with open("./fabric-config.json", "w") as outfile:
     outfile.write(json.dumps(json_config_file, indent=2))
