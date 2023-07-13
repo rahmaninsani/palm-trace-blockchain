@@ -1,17 +1,23 @@
+import os
 import json
+
+from dotenv import load_dotenv
+load_dotenv("./fablo-target/fabric-docker/.env")
 
 fablo_dict = json.load(open("./fablo-config.json", "r"))
 json_config_file = {
-    "port": 3000,
     "orgs": {},
     "channels": {},
     "chaincodes": fablo_dict["chaincodes"],
 }
 
 # Add orgs
-for i in fablo_dict["orgs"]:
-    org_name = i["organization"]["name"]
-    domain = i["organization"]["domain"]
+for index, org in enumerate(fablo_dict["orgs"]):
+    if index == 0:
+        continue
+
+    org_name = org["organization"]["name"]
+    domain = org["organization"]["domain"]
 
     connectionProfile = json.load(
         open(
@@ -37,17 +43,26 @@ for i in fablo_dict["orgs"]:
         "r",
     )
 
+    email = os.getenv("{}_CA_ADMIN_NAME".format(org_name.upper()))
+    password = os.getenv("{}_CA_ADMIN_PASSWORD".format(org_name.upper()))
+    msp = "{}MSP".format(org["organization"]["name"])
+    connectionProfile = json.dumps(connectionProfile)
+    certificate = str(certificate.read())
+    privateKey = str(privateKey.read())
+
     json_config_file["orgs"][org_name] = {
-        "msp": i["organization"]["name"] + "MSP",
-        "connectionProfile": json.dumps(connectionProfile),
-        "certificate": str(certificate.read()),
-        "privateKey": str(privateKey.read()),
+        "email": email,
+        "password": password,
+        "msp": msp,
+        "connectionProfile": connectionProfile,
+        "certificate": certificate,
+        "privateKey": privateKey,
     }
 
 # Add channels
-for i in fablo_dict["channels"]:
-    json_config_file["channels"][i["name"]] = {
-        "acceptOrgs": [j["name"] for j in i["orgs"]]
+for channel in fablo_dict["channels"]:
+    json_config_file["channels"][channel["name"]] = {
+        "acceptOrgs": [org["name"] for org in channel["orgs"]]
     }
 
 # Saving env file
