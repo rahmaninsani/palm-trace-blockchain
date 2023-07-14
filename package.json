@@ -1,0 +1,15 @@
+{
+  "name": "palm-safe-blockchain",
+  "version": "1.0.0",
+  "description": "Palm Safe Blockchain",
+  "type": "module",
+  "main": "generate-fabric-config-file.js",
+  "scripts": {
+    "start": "node generate-fabric-config-file.js"
+  },
+  "author": "Rahman Insani",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
