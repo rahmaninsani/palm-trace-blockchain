@@ -46,11 +46,10 @@ const main = async () => {
 
       const connectionProfileObj = await readJsonFile(`fablo-target/fabric-config/connection-profiles/connection-profile-${name.toLowerCase()}.json`);
 
-      const peerName = name.toLowerCase() === "pabrikkelapasawit" ? "pks" : name.toLowerCase();
       const connectionProfileOrgs = {
         [name]: {
           mspid: connectionProfileObj.organizations[name].mspid,
-          peers: connectionProfileObj.organizations[name].peers.filter((peer) => peer.includes(peerName)),
+          peers: connectionProfileObj.organizations[name].peers.filter((peer) => peer.includes(name.toLowerCase())),
           certificateAuthorities: connectionProfileObj.organizations[name].certificateAuthorities,
         },
       };
