@@ -14,7 +14,7 @@ type ReferensiHargaChaincode struct {
 
 type ReferensiHarga struct {
 	Id               string  `json:"id"`
-	IdDinas          []byte  `json:"idDinas"`
+	IdDinas          string  `json:"idDinas"`
 	UmurTanam        int     `json:"umurTanam"`
 	Harga            float64 `json:"harga"`
 	TanggalPembaruan string  `json:"tanggalPembaruan"`
@@ -137,37 +137,6 @@ func (c *ReferensiHargaChaincode) GetAll(ctx contractapi.TransactionContextInter
 	return referensiHargaAssets, nil
 }
 
-func (c *ReferensiHargaChaincode) assetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-
-	assetJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return false, fmt.Errorf("failed to read from world state: %v", err)
-	}
-
-	return assetJSON != nil, nil
-}
-
-func (c *ReferensiHargaChaincode) checkAffiliation(ctx contractapi.TransactionContextInterface, allowedAffiliations []string) error {
-	affiliation, isExist, err := ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
-	if !isExist || err != nil {
-		return fmt.Errorf("failed to get client affiliation: %v", err)
-	}
-
-	isAllowed := false
-	for _, allowedAffiliation := range allowedAffiliations {
-		if affiliation == allowedAffiliation {
-			isAllowed = true
-			break
-		}
-	}
-
-	if !isAllowed {
-		return fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
-	}
-
-	return nil
-}
-
 func (c *ReferensiHargaChaincode) GetWithHistory(ctx contractapi.TransactionContextInterface, id string) ([]ReferensiHargaHistory, error) {
 	err := c.checkAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
 	if err != nil {
@@ -223,4 +192,35 @@ func (c *ReferensiHargaChaincode) GetWithHistory(ctx contractapi.TransactionCont
 	}
 
 	return referensiHargaAssets, nil
+}
+
+func (c *ReferensiHargaChaincode) assetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+
+	assetJSON, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+
+	return assetJSON != nil, nil
+}
+
+func (c *ReferensiHargaChaincode) checkAffiliation(ctx contractapi.TransactionContextInterface, allowedAffiliations []string) error {
+	affiliation, isExist, err := ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
+	if !isExist || err != nil {
+		return fmt.Errorf("failed to get client affiliation: %v", err)
+	}
+
+	isAllowed := false
+	for _, allowedAffiliation := range allowedAffiliations {
+		if affiliation == allowedAffiliation {
+			isAllowed = true
+			break
+		}
+	}
+
+	if !isAllowed {
+		return fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
+	}
+
+	return nil
 }
