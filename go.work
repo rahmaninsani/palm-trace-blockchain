@@ -2,5 +2,5 @@ go 1.20
 
 use (
 	./chaincodes/asset-transaksi
-	./chaincodes/referensi-harga
+	./chaincodes/referensi-harga-chaincode
 )

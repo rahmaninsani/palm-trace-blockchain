@@ -84,13 +84,30 @@
           "peers": ["peer0"]
         }
       ]
+    },
+    {
+      "name": "transaksi-channel",
+      "orgs": [
+        {
+          "name": "PabrikKelapaSawit",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "Koperasi",
+          "peers": ["peer0"]
+        },
+        {
+          "name": "Petani",
+          "peers": ["peer0"]
+        }
+      ]
     }
   ],
   "chaincodes": [
     {
       "name": "referensi-harga-chaincode",
       "version": "0.0.1",
-      "lang": "golang",
+      "lang": "node",
       "channel": "referensi-harga-channel",
       "directory": "./chaincodes/referensi-harga-chaincode"
     }
