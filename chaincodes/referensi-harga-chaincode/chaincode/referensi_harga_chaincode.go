@@ -3,7 +3,10 @@ package chaincode
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+
+	"referensi-harga-chaincode/helper"
+	"referensi-harga-chaincode/model/domain"
+	"referensi-harga-chaincode/model/web"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -12,103 +15,106 @@ type ReferensiHargaChaincode struct {
 	contractapi.Contract
 }
 
-type ReferensiHarga struct {
-	Id               string  `json:"id"`
-	IdDinas          string  `json:"idDinas"`
-	UmurTanam        int     `json:"umurTanam"`
-	Harga            float64 `json:"harga"`
-	TanggalPembaruan string  `json:"tanggalPembaruan"`
-}
-
-type ReferensiHargaHistory struct {
-	Timestamp string         `json:"timestamp"`
-	Asset     ReferensiHarga `json:"asset"`
-}
-
-func (c *ReferensiHargaChaincode) Create(ctx contractapi.TransactionContextInterface, payload string) (string, error) {
-
-	err := c.checkAffiliation(ctx, []string{"dinas.user"})
+func (c *ReferensiHargaChaincode) Create(ctx contractapi.TransactionContextInterface, payload string) (*web.ReferensiHargaResponse, error) {
+	err := helper.CheckAffiliation(ctx, []string{"dinas.user"})
 	if err != nil {
-		return "", fmt.Errorf("submitting client not authorized to create asset, does not have dinas.user affiliation/role")
+		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have dinas.user affiliation/role")
 	}
 
-	var referensiHarga ReferensiHarga
-	err = json.Unmarshal([]byte(payload), &referensiHarga)
+	var referensiHargaCreateRequest web.ReferensiHargaCreateRequest
+	err = json.Unmarshal([]byte(payload), &referensiHargaCreateRequest)
 	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal object: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
 	}
 
-	exists, err := c.assetExists(ctx, referensiHarga.Id)
+	exists, err := helper.AssetExists(ctx, referensiHargaCreateRequest.Id)
 	if err != nil {
-		return "", fmt.Errorf("failed to get asset: %v", err)
+		return nil, fmt.Errorf("failed to get asset: %v", err)
 	}
 
 	if exists {
-		return "", fmt.Errorf("the asset %s already exists", referensiHarga.Id)
+		return nil, fmt.Errorf("the asset %s already exists", referensiHargaCreateRequest.Id)
+	}
+
+	referensiHarga := domain.ReferensiHarga{
+		Id:        referensiHargaCreateRequest.Id,
+		IdDinas:   referensiHargaCreateRequest.IdDinas,
+		UmurTanam: referensiHargaCreateRequest.UmurTanam,
+		Harga:     referensiHargaCreateRequest.Harga,
 	}
 
 	referensiHargaJSON, err := json.Marshal(referensiHarga)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal asset: %v", err)
+		return nil, fmt.Errorf("failed to marshal asset: %v", err)
 	}
 
-	return ctx.GetStub().GetTxID(), ctx.GetStub().PutState(referensiHarga.Id, referensiHargaJSON)
+	err = ctx.GetStub().PutState(referensiHarga.Id, referensiHargaJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to put state: %v", err)
+	}
+
+	referensiHargaResponse := web.ReferensiHargaResponse{
+		IdTransaksiBlockchain: ctx.GetStub().GetTxID(),
+		Id:                    referensiHarga.Id,
+		IdDinas:               referensiHarga.IdDinas,
+		UmurTanam:             referensiHarga.UmurTanam,
+		Harga:                 referensiHarga.Harga,
+	}
+
+	return &referensiHargaResponse, nil
 }
 
-func (c *ReferensiHargaChaincode) Update(ctx contractapi.TransactionContextInterface, id string, payload string) error {
-	err := c.checkAffiliation(ctx, []string{"dinas.user"})
+func (c *ReferensiHargaChaincode) Update(ctx contractapi.TransactionContextInterface, payload string) (*web.ReferensiHargaResponse, error) {
+	err := helper.CheckAffiliation(ctx, []string{"dinas.user"})
 	if err != nil {
-		return fmt.Errorf("submitting client not authorized to update asset, does not have dinas.user affiliation/role")
+		return nil, fmt.Errorf("submitting client not authorized to update asset, does not have dinas.user affiliation/role")
 	}
 
-	exists, err := c.assetExists(ctx, id)
+	var referensiHargaUpdateRequest web.ReferensiHargaUpdateRequest
+	err = json.Unmarshal([]byte(payload), &referensiHargaUpdateRequest)
 	if err != nil {
-		return fmt.Errorf("failed to get asset: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
+	}
+
+	exists, err := helper.AssetExists(ctx, referensiHargaUpdateRequest.Id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get asset: %v", err)
 	}
 
 	if !exists {
-		return fmt.Errorf("the asset %s does not exist", id)
+		return nil, fmt.Errorf("the asset %s does not exist", referensiHargaUpdateRequest.Id)
 	}
 
-	var updatedReferensiHargaAsset ReferensiHarga
-	err = json.Unmarshal([]byte(payload), &updatedReferensiHargaAsset)
+	referensiHarga := domain.ReferensiHarga{
+		Id:        referensiHargaUpdateRequest.Id,
+		IdDinas:   referensiHargaUpdateRequest.IdDinas,
+		UmurTanam: referensiHargaUpdateRequest.UmurTanam,
+		Harga:     referensiHargaUpdateRequest.Harga,
+	}
+
+	referensiHargaJSON, err := json.Marshal(referensiHarga)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal object: %v", err)
+		return nil, fmt.Errorf("failed to marshal updated asset: %v", err)
 	}
 
-	updatedReferensiHargaAssetJSON, err := json.Marshal(updatedReferensiHargaAsset)
+	err = ctx.GetStub().PutState(referensiHarga.Id, referensiHargaJSON)
 	if err != nil {
-		return fmt.Errorf("failed to marshal updated asset: %v", err)
+		return nil, fmt.Errorf("failed to put state: %v", err)
 	}
 
-	return ctx.GetStub().PutState(id, updatedReferensiHargaAssetJSON)
+	referensiHargaResponse := web.ReferensiHargaResponse{
+		IdTransaksiBlockchain: ctx.GetStub().GetTxID(),
+		Id:                    referensiHarga.Id,
+		IdDinas:               referensiHarga.IdDinas,
+		UmurTanam:             referensiHarga.UmurTanam,
+		Harga:                 referensiHarga.Harga,
+	}
+
+	return &referensiHargaResponse, nil
 }
 
-func (c *ReferensiHargaChaincode) Get(ctx contractapi.TransactionContextInterface, id string) (*ReferensiHarga, error) {
-	err := c.checkAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
-	if err != nil {
-		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
-	}
-
-	referensiHargaJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if referensiHargaJSON == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", id)
-	}
-
-	var referensiHarga ReferensiHarga
-	err = json.Unmarshal(referensiHargaJSON, &referensiHarga)
-	if err != nil {
-		return nil, err
-	}
-
-	return &referensiHarga, nil
-}
-
-func (c *ReferensiHargaChaincode) GetAll(ctx contractapi.TransactionContextInterface) ([]*ReferensiHarga, error) {
-	err := c.checkAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
+func (c *ReferensiHargaChaincode) GetAll(ctx contractapi.TransactionContextInterface) ([]*web.ReferensiHargaResponse, error) {
+	err := helper.CheckAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
 	if err != nil {
 		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
 	}
@@ -119,108 +125,74 @@ func (c *ReferensiHargaChaincode) GetAll(ctx contractapi.TransactionContextInter
 	}
 	defer resultsIterator.Close()
 
-	var referensiHargaAssets []*ReferensiHarga
+	var referensiHargaResponses []*web.ReferensiHargaResponse
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
 
-		var referensiHarga ReferensiHarga
+		txID := ctx.GetStub().GetTxID()
+
+		var referensiHarga domain.ReferensiHarga
 		err = json.Unmarshal(queryResponse.Value, &referensiHarga)
 		if err != nil {
 			return nil, err
 		}
-		referensiHargaAssets = append(referensiHargaAssets, &referensiHarga)
+
+		referensiHargaResponse := web.ReferensiHargaResponse{
+			IdTransaksiBlockchain: txID,
+			Id:                    referensiHarga.Id,
+			IdDinas:               referensiHarga.IdDinas,
+			UmurTanam:             referensiHarga.UmurTanam,
+			Harga:                 referensiHarga.Harga,
+		}
+		referensiHargaResponses = append(referensiHargaResponses, &referensiHargaResponse)
 	}
 
-	return referensiHargaAssets, nil
+	return referensiHargaResponses, nil
 }
 
-func (c *ReferensiHargaChaincode) GetWithHistory(ctx contractapi.TransactionContextInterface, id string) ([]ReferensiHargaHistory, error) {
-	err := c.checkAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
+func (c *ReferensiHargaChaincode) GetHistoryById(ctx contractapi.TransactionContextInterface, payload string) ([]*web.ReferensiHargaResponse, error) {
+	err := helper.CheckAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
 	if err != nil {
 		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
 	}
 
-	referensiHargaJSON, err := ctx.GetStub().GetState(id)
+	var referensiHargaGetRequest web.ReferensiHargaGetRequest
+	err = json.Unmarshal([]byte(payload), &referensiHargaGetRequest)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	if referensiHargaJSON == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", id)
+		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
 	}
 
-	var referensiHargaAssets []ReferensiHargaHistory
-
-	var latestReferensiHargaAsset ReferensiHarga
-	err = json.Unmarshal(referensiHargaJSON, &latestReferensiHargaAsset)
+	resultsIterator, err := ctx.GetStub().GetHistoryForKey(referensiHargaGetRequest.Id)
 	if err != nil {
-		return nil, err
-	}
-
-	referensiHargaHistory := ReferensiHargaHistory{
-		Timestamp: time.Now().Format(time.RFC3339),
-		Asset:     latestReferensiHargaAsset,
-	}
-	referensiHargaAssets = append(referensiHargaAssets, referensiHargaHistory)
-
-	// Get the history of previous versions
-	resultsIterator, err := ctx.GetStub().GetHistoryForKey(id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get history for key %s: %v", id, err)
+		return nil, fmt.Errorf("failed to get history for key %s: %v", referensiHargaGetRequest.Id, err)
 	}
 	defer resultsIterator.Close()
 
+	var referensiHargaResponses []*web.ReferensiHargaResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return nil, fmt.Errorf("failed to iterate history for key %s: %v", id, err)
+			return nil, fmt.Errorf("failed to iterate history for key %s: %v", referensiHargaGetRequest.Id, err)
 		}
 
-		var previousReferensiHargaAsset ReferensiHarga
-		err = json.Unmarshal(response.Value, &previousReferensiHargaAsset)
+		var referensiHarga domain.ReferensiHarga
+		err = json.Unmarshal(response.Value, &referensiHarga)
 		if err != nil {
 			return nil, err
 		}
 
-		referensiHargaHistory := ReferensiHargaHistory{
-			Timestamp: response.Timestamp.String(),
-			Asset:     previousReferensiHargaAsset,
+		referensiHargaResponse := web.ReferensiHargaResponse{
+			IdTransaksiBlockchain: response.GetTxId(),
+			Id:                    referensiHarga.Id,
+			IdDinas:               referensiHarga.IdDinas,
+			UmurTanam:             referensiHarga.UmurTanam,
+			Harga:                 referensiHarga.Harga,
 		}
-		referensiHargaAssets = append(referensiHargaAssets, referensiHargaHistory)
+		referensiHargaResponses = append(referensiHargaResponses, &referensiHargaResponse)
 	}
 
-	return referensiHargaAssets, nil
-}
-
-func (c *ReferensiHargaChaincode) assetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-
-	assetJSON, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return false, fmt.Errorf("failed to read from world state: %v", err)
-	}
-
-	return assetJSON != nil, nil
-}
-
-func (c *ReferensiHargaChaincode) checkAffiliation(ctx contractapi.TransactionContextInterface, allowedAffiliations []string) error {
-	affiliation, isExist, err := ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
-	if !isExist || err != nil {
-		return fmt.Errorf("failed to get client affiliation: %v", err)
-	}
-
-	isAllowed := false
-	for _, allowedAffiliation := range allowedAffiliations {
-		if affiliation == allowedAffiliation {
-			isAllowed = true
-			break
-		}
-	}
-
-	if !isAllowed {
-		return fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
-	}
-
-	return nil
+	return referensiHargaResponses, nil
 }
