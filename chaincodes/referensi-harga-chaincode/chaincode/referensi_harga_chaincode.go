@@ -21,26 +21,19 @@ func (c *ReferensiHargaChaincode) Create(ctx contractapi.TransactionContextInter
 		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have dinas.user affiliation/role")
 	}
 
-	var referensiHargaCreateRequest web.ReferensiHargaCreateRequest
-	err = json.Unmarshal([]byte(payload), &referensiHargaCreateRequest)
+	var referensiHarga domain.ReferensiHarga
+	err = json.Unmarshal([]byte(payload), &referensiHarga)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
 	}
 
-	exists, err := helper.AssetExists(ctx, referensiHargaCreateRequest.Id)
+	exists, err := helper.AssetExists(ctx, referensiHarga.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get asset: %v", err)
 	}
 
 	if exists {
-		return nil, fmt.Errorf("the asset %s already exists", referensiHargaCreateRequest.Id)
-	}
-
-	referensiHarga := domain.ReferensiHarga{
-		Id:        referensiHargaCreateRequest.Id,
-		IdDinas:   referensiHargaCreateRequest.IdDinas,
-		UmurTanam: referensiHargaCreateRequest.UmurTanam,
-		Harga:     referensiHargaCreateRequest.Harga,
+		return nil, fmt.Errorf("the asset %s already exists", referensiHarga.Id)
 	}
 
 	referensiHargaJSON, err := json.Marshal(referensiHarga)
@@ -59,6 +52,7 @@ func (c *ReferensiHargaChaincode) Create(ctx contractapi.TransactionContextInter
 		IdDinas:               referensiHarga.IdDinas,
 		UmurTanam:             referensiHarga.UmurTanam,
 		Harga:                 referensiHarga.Harga,
+		TanggalPembaruan:      referensiHarga.TanggalPembaruan,
 	}
 
 	return &referensiHargaResponse, nil
@@ -70,26 +64,19 @@ func (c *ReferensiHargaChaincode) Update(ctx contractapi.TransactionContextInter
 		return nil, fmt.Errorf("submitting client not authorized to update asset, does not have dinas.user affiliation/role")
 	}
 
-	var referensiHargaUpdateRequest web.ReferensiHargaUpdateRequest
-	err = json.Unmarshal([]byte(payload), &referensiHargaUpdateRequest)
+	var referensiHarga domain.ReferensiHarga
+	err = json.Unmarshal([]byte(payload), &referensiHarga)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
 	}
 
-	exists, err := helper.AssetExists(ctx, referensiHargaUpdateRequest.Id)
+	exists, err := helper.AssetExists(ctx, referensiHarga.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get asset: %v", err)
 	}
 
 	if !exists {
-		return nil, fmt.Errorf("the asset %s does not exist", referensiHargaUpdateRequest.Id)
-	}
-
-	referensiHarga := domain.ReferensiHarga{
-		Id:        referensiHargaUpdateRequest.Id,
-		IdDinas:   referensiHargaUpdateRequest.IdDinas,
-		UmurTanam: referensiHargaUpdateRequest.UmurTanam,
-		Harga:     referensiHargaUpdateRequest.Harga,
+		return nil, fmt.Errorf("the asset %s does not exist", referensiHarga.Id)
 	}
 
 	referensiHargaJSON, err := json.Marshal(referensiHarga)
@@ -108,6 +95,7 @@ func (c *ReferensiHargaChaincode) Update(ctx contractapi.TransactionContextInter
 		IdDinas:               referensiHarga.IdDinas,
 		UmurTanam:             referensiHarga.UmurTanam,
 		Harga:                 referensiHarga.Harga,
+		TanggalPembaruan:      referensiHarga.TanggalPembaruan,
 	}
 
 	return &referensiHargaResponse, nil
@@ -127,25 +115,23 @@ func (c *ReferensiHargaChaincode) GetAll(ctx contractapi.TransactionContextInter
 
 	var referensiHargaResponses []*web.ReferensiHargaResponse
 	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
+		response, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
 
-		txID := ctx.GetStub().GetTxID()
-
 		var referensiHarga domain.ReferensiHarga
-		err = json.Unmarshal(queryResponse.Value, &referensiHarga)
+		err = json.Unmarshal(response.Value, &referensiHarga)
 		if err != nil {
 			return nil, err
 		}
 
 		referensiHargaResponse := web.ReferensiHargaResponse{
-			IdTransaksiBlockchain: txID,
-			Id:                    referensiHarga.Id,
-			IdDinas:               referensiHarga.IdDinas,
-			UmurTanam:             referensiHarga.UmurTanam,
-			Harga:                 referensiHarga.Harga,
+			Id:               referensiHarga.Id,
+			IdDinas:          referensiHarga.IdDinas,
+			UmurTanam:        referensiHarga.UmurTanam,
+			Harga:            referensiHarga.Harga,
+			TanggalPembaruan: referensiHarga.TanggalPembaruan,
 		}
 		referensiHargaResponses = append(referensiHargaResponses, &referensiHargaResponse)
 	}
@@ -153,21 +139,15 @@ func (c *ReferensiHargaChaincode) GetAll(ctx contractapi.TransactionContextInter
 	return referensiHargaResponses, nil
 }
 
-func (c *ReferensiHargaChaincode) GetHistoryById(ctx contractapi.TransactionContextInterface, payload string) ([]*web.ReferensiHargaResponse, error) {
+func (c *ReferensiHargaChaincode) GetHistoryById(ctx contractapi.TransactionContextInterface, id string) ([]*web.ReferensiHargaResponse, error) {
 	err := helper.CheckAffiliation(ctx, []string{"dinas.user", "petani.user", "koperasi.user", "pabrikkelapasawit.user"})
 	if err != nil {
 		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
 	}
 
-	var referensiHargaGetRequest web.ReferensiHargaGetRequest
-	err = json.Unmarshal([]byte(payload), &referensiHargaGetRequest)
+	resultsIterator, err := ctx.GetStub().GetHistoryForKey(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
-	}
-
-	resultsIterator, err := ctx.GetStub().GetHistoryForKey(referensiHargaGetRequest.Id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get history for key %s: %v", referensiHargaGetRequest.Id, err)
+		return nil, fmt.Errorf("failed to get history for key %s: %v", id, err)
 	}
 	defer resultsIterator.Close()
 
@@ -175,7 +155,7 @@ func (c *ReferensiHargaChaincode) GetHistoryById(ctx contractapi.TransactionCont
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return nil, fmt.Errorf("failed to iterate history for key %s: %v", referensiHargaGetRequest.Id, err)
+			return nil, fmt.Errorf("failed to iterate history for key %s: %v", id, err)
 		}
 
 		var referensiHarga domain.ReferensiHarga
@@ -190,6 +170,7 @@ func (c *ReferensiHargaChaincode) GetHistoryById(ctx contractapi.TransactionCont
 			IdDinas:               referensiHarga.IdDinas,
 			UmurTanam:             referensiHarga.UmurTanam,
 			Harga:                 referensiHarga.Harga,
+			TanggalPembaruan:      referensiHarga.TanggalPembaruan,
 		}
 		referensiHargaResponses = append(referensiHargaResponses, &referensiHargaResponse)
 	}

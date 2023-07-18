@@ -1,9 +1,9 @@
 package domain
 
 type ReferensiHarga struct {
-	Id               string
-	IdDinas          string
-	UmurTanam        int
-	Harga            float64
-	TanggalPembaruan string
+	Id               string  `json:"id"`
+	IdDinas          string  `json:"idDinas"`
+	UmurTanam        int     `json:"umurTanam"`
+	Harga            float64 `json:"harga"`
+	TanggalPembaruan string  `json:"tanggalPembaruan"`
 }
