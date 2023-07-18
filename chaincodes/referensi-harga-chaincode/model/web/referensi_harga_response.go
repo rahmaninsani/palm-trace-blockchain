@@ -1,7 +1,7 @@
 package web
 
 type ReferensiHargaResponse struct {
-	IdTransaksiBlockchain string  `json:"idTransaksiBlockhain,omitempty"`
+	IdTransaksiBlockchain string  `json:"idTransaksiBlockchain,omitempty" metadata:",optional"`
 	Id                    string  `json:"id"`
 	IdDinas               string  `json:"idDinas"`
 	UmurTanam             int     `json:"umurTanam"`
