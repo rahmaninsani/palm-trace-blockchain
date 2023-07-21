@@ -1,6 +1,6 @@
 package domain
 
-type SupplyChain struct {
+type RantaiPasok struct {
 	Id               string  `json:"id"`
 	IdDinas          string  `json:"idDinas"`
 	UmurTanam        int     `json:"umurTanam"`

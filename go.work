@@ -2,5 +2,5 @@ go 1.20
 
 use (
 	./chaincodes/referensi-harga-chaincode
-	./chaincodes/supply-chain-chaincode
+	./chaincodes/rantai-pasok-chaincode
 )

@@ -1,4 +1,4 @@
-module supply-chain-chaincode
+module rantai-pasok-chaincode
 
 go 1.20
 

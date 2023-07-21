@@ -1,6 +1,6 @@
 package web
 
-type SupplyChainResponse struct {
+type RantaiPasokResponse struct {
 	IdTransaksiBlockchain string  `json:"idTransaksiBlockchain,omitempty" metadata:",optional"`
 	Id                    string  `json:"id"`
 	IdDinas               string  `json:"idDinas"`
