@@ -1,4 +1,4 @@
-module referensi-harga-chaincode
+module supply-chain-chaincode
 
 go 1.20
 
