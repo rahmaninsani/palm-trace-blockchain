@@ -86,7 +86,7 @@
       ]
     },
     {
-      "name": "transaksi-channel",
+      "name": "rantai-pasok-channel",
       "orgs": [
         {
           "name": "PabrikKelapaSawit",
@@ -107,9 +107,16 @@
     {
       "name": "referensi-harga-chaincode",
       "version": "0.0.1",
-      "lang": "node",
+      "lang": "golang",
       "channel": "referensi-harga-channel",
       "directory": "./chaincodes/referensi-harga-chaincode"
+    },
+    {
+      "name": "rantai-pasok-chaincode",
+      "version": "0.0.1",
+      "lang": "golang",
+      "channel": "rantai-pasok-channel",
+      "directory": "./chaincodes/rantai-pasok-chaincode"
     }
   ],
   "hooks": {

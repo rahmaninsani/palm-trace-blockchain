@@ -9,5 +9,5 @@ type Kebun struct {
 	Luas           float64 `json:"luas"`
 	NomorRspo      string  `json:"nomorRspo"`
 	SertifikatRspo string  `json:"sertifikatRspo"`
-	UmurTanam      int     `json:"umurTanam"`
+	UpdatedAt      string  `json:"updatedAt"`
 }

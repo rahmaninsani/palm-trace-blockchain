@@ -65,12 +65,8 @@
   ],
   "channels": [
     {
-      "name": "referensi-harga-channel",
+      "name": "rantai-pasok-channel",
       "orgs": [
-        {
-          "name": "Dinas",
-          "peers": ["peer0"]
-        },
         {
           "name": "PabrikKelapaSawit",
           "peers": ["peer0"]
@@ -82,17 +78,21 @@
         {
           "name": "Petani",
           "peers": ["peer0"]
+        },
+        {
+          "name": "Dinas",
+          "peers": ["peer0"]
         }
       ]
     }
   ],
   "chaincodes": [
     {
-      "name": "referensi-harga-chaincode",
+      "name": "rantai-pasok-chaincode",
       "version": "0.0.1",
       "lang": "golang",
-      "channel": "referensi-harga-channel",
-      "directory": "./chaincodes/referensi-harga-chaincode"
+      "channel": "rantai-pasok-channel",
+      "directory": "./chaincodes/rantai-pasok-chaincode"
     }
   ],
   "hooks": {
