@@ -21,12 +21,15 @@ func (status StatusRantaiPasok) String() string {
 type Status int
 
 const (
-	Disetujui Status = iota // 0
-	Ditolak                 // 1
+	MenungguKonfirmasi Status = iota // 0
+	Disetujui                        // 1
+	Ditolak                          // 2
 )
 
 func (status Status) String() string {
 	switch status {
+	case MenungguKonfirmasi:
+		return "Menunggu Konfirmasi"
 	case Disetujui:
 		return "Disetujui"
 	case Ditolak:
