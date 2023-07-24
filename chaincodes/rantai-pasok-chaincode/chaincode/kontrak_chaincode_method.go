@@ -11,144 +11,107 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-type RantaiPasokChaincode struct {
-	contractapi.Contract
-}
-
-func (c *RantaiPasokChaincode) CreateKontrak(ctx contractapi.TransactionContextInterface, payload string) (*web.CreateKontrakResponse, error) {
-	err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"})
-	if err != nil {
-		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have pabrikkelapasawit.user affiliation/role")
+func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionContextInterface, payload string) (*web.KontrakResponse, error) {
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"}); err != nil {
+		return nil, fmt.Errorf("unauthorized: %v", err)
 	}
 
-	var kontrak domain.Kontrak
-	err = json.Unmarshal([]byte(payload), &kontrak)
-	if err != nil {
+	var kontrakCreateRequest web.KontrakCreateRequest
+	if err := json.Unmarshal([]byte(payload), &kontrakCreateRequest); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal payload: %v", err)
 	}
 
-	compositeKeyType := "kontrak~id"
-	compositeKeyComponents := []string{kontrak.Id}
-	kontrakCompositeKey, err := ctx.GetStub().CreateCompositeKey(compositeKeyType, compositeKeyComponents)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create composite key: %v", err)
-	}
-
-	exists, err := helper.AssetExists(ctx, kontrakCompositeKey)
+	kontrakPrev, err := helper.GetAsset(ctx, kontrakCreateRequest.Id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get asset: %v", err)
 	}
 
-	if exists {
-		return nil, fmt.Errorf("the asset %s already exists", kontrakCompositeKey)
+	if kontrakPrev != nil {
+		return nil, fmt.Errorf("the asset %s already exists", kontrakCreateRequest.Id)
 	}
 
-	// Set nilai default atau kosong untuk field yang belum terisi
-	kontrak.Status = constant.PenawaranKontrakMenungguKonfirmasi
-	kontrak.DeliveryOrders = []domain.DeliveryOrder{}
+	kontrak := domain.Kontrak{
+		Id:                kontrakCreateRequest.Id,
+		AssetType:         constant.AssetTypeKontrak,
+		IdPks:             kontrakCreateRequest.IdPks,
+		IdKoperasi:        kontrakCreateRequest.IdKoperasi,
+		Nomor:             kontrakCreateRequest.Nomor,
+		TanggalPembuatan:  kontrakCreateRequest.TanggalPembuatan,
+		TangalMulai:       kontrakCreateRequest.TangalMulai,
+		TanggalSelesai:    kontrakCreateRequest.TanggalSelesai,
+		Kuantitas:         kontrakCreateRequest.Kuantitas,
+		Harga:             kontrakCreateRequest.Harga,
+		Status:            constant.PenawaranKontrakMenungguKonfirmasi,
+		Pesan:             "",
+		TanggalRespons:    "",
+		KuantitasTepenuhi: 0,
+		KuantitasTersisa:  0,
+		CreatedAt:         kontrakCreateRequest.CreatedAt,
+		UpdatedAt:         kontrakCreateRequest.UpdatedAt,
+	}
 
 	kontrakJSON, err := json.Marshal(kontrak)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal kontrak: %v", err)
 	}
 
-	err = ctx.GetStub().PutState(kontrakCompositeKey, kontrakJSON)
-	if err != nil {
+	if err = ctx.GetStub().PutState(kontrak.Id, kontrakJSON); err != nil {
 		return nil, fmt.Errorf("failed to put kontrak on ledger: %v", err)
 	}
 
-	kontrakResponse := &web.CreateKontrakResponse{
-		IdTransaksiBlockchain: ctx.GetStub().GetTxID(),
-		Id:                    kontrak.Id,
-		Nomor:                 kontrak.Nomor,
-		TanggalPembuatan:      kontrak.TanggalPembuatan,
-		TangalMulai:           kontrak.TangalMulai,
-		TanggalSelesai:        kontrak.TanggalSelesai,
-		IdPks:                 kontrak.IdPks,
-		IdKoperasi:            kontrak.IdKoperasi,
-		Kuantitas:             kontrak.Kuantitas,
-		Harga:                 kontrak.Harga,
-		Status:                kontrak.Status.String(),
-	}
-
-	return kontrakResponse, nil
+	return helper.ToKontrakResponse(ctx, kontrak), nil
 }
 
-// func (c *RantaiPasokChaincode) ConfirmContract(ctx contractapi.TransactionContextInterface, payload string) (*web.ConfirmKontrakResponse, error) {
-// 	err := helper.CheckAffiliation(ctx, []string{"koperasi.user"})
-// 	if err != nil {
-// 		return nil, fmt.Errorf("submitting client not authorized to confirm contract, does not have koperasi.user affiliation/role")
-// 	}
+func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionContextInterface, payload string) (*web.KontrakResponse, error) {
+	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user"}); err != nil {
+		return nil, fmt.Errorf("unauthorized: %v", err)
+	}
 
-// 	var confirmContractRequest web.ConfirmContractRequest
-// 	err = json.Unmarshal([]byte(payload), &confirmContractRequest)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to unmarshal payload: %v", err)
-// 	}
+	var kontrakConfirmRequest web.KontrakConfirmRequest
+	if err := json.Unmarshal([]byte(payload), &kontrakConfirmRequest); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %v", err)
+	}
 
-// 	compositeKeyType := "Kontrak"
-// 	compositeKeyComponents := []string{confirmContractRequest.IdPks, confirmContractRequest.IdKoperasi, confirmContractRequest.IdKontrak}
-// 	kontrakCompositeKey, err := helper.CreateCompositeKeyWithUnderscore(ctx, compositeKeyType, compositeKeyComponents)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to create composite key: %v", err)
-// 	}
+	kontrakPrev, err := helper.GetAsset(ctx, kontrakConfirmRequest.Id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read kontrak from world state: %v", err)
+	}
 
-// 	kontrakJSON, err := ctx.GetStub().GetState(kontrakCompositeKey)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to read kontrak from world state: %v", err)
-// 	}
+	if kontrakPrev == nil {
+		return nil, fmt.Errorf("the asset %s does not exist", kontrakConfirmRequest.Id)
+	}
 
-// 	if kontrakJSON == nil {
-// 		return nil, fmt.Errorf("the asset %s does not exist", kontrakCompositeKey)
-// 	}
+	var kontrak domain.Kontrak
+	if err = json.Unmarshal(kontrakPrev, &kontrak); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal kontrak: %v", err)
+	}
 
-// 	var kontrak domain.Kontrak
-// 	err = json.Unmarshal(kontrakJSON, &kontrak)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to unmarshal kontrak: %v", err)
-// 	}
+	if kontrak.IdKoperasi != kontrakConfirmRequest.IdKoperasi {
+		return nil, fmt.Errorf("the asset %s is not assigned to the koperasi %s", kontrak.Id, kontrakConfirmRequest.IdKoperasi)
+	}
 
-// 	// Cek apakah kontrak sudah dikonfirmasi oleh Koperasi sebelumnya
-// 	if kontrak.Status != helper.MenungguKonfirmasi {
-// 		return nil, fmt.Errorf("the asset %s has been confirmed by Koperasi", kontrakCompositeKey)
-// 	}
+	if kontrak.Status != constant.PenawaranKontrakMenungguKonfirmasi {
+		return nil, fmt.Errorf("the asset %s has been confirmed by Koperasi", kontrak.IdKoperasi)
+	}
 
-// 	// Lakukan konfirmasi kontrak oleh Koperasi
-// 	kontrak.Status = confirmContractRequest.Status
-// 	kontrak.Pesan = confirmContractRequest.Pesan
-// 	kontrak.TanggalRespons = confirmContractRequest.TanggalRespons
-// 	kontrak.KuantitasTersisa = kontrak.Kuantitas
+	// Konfirmasi kontrak
+	kontrak.Status = kontrakConfirmRequest.Status
+	kontrak.Pesan = kontrakConfirmRequest.Pesan
+	kontrak.TanggalRespons = kontrakConfirmRequest.TanggalRespons
+	kontrak.KuantitasTersisa = kontrak.Kuantitas
+	kontrak.UpdatedAt = kontrakConfirmRequest.UpdatedAt
 
-// 	kontrakJSON, err = json.Marshal(kontrak)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to marshal kontrak: %v", err)
-// 	}
+	kontrakJSON, err := json.Marshal(kontrak)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal kontrak: %v", err)
+	}
 
-// 	err = ctx.GetStub().PutState(kontrakCompositeKey, kontrakJSON)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to put kontrak on ledger: %v", err)
-// 	}
+	if err = ctx.GetStub().PutState(kontrak.Id, kontrakJSON); err != nil {
+		return nil, fmt.Errorf("failed to put kontrak on ledger: %v", err)
+	}
 
-// 	kontrakResponse := &web.ConfirmKontrakResponse{
-// 		IdTransaksiBlockchain: ctx.GetStub().GetTxID(),
-// 		Id:                    kontrak.Id,
-// 		Nomor:                 kontrak.Nomor,
-// 		TanggalPembuatan:      kontrak.TanggalPembuatan,
-// 		TangalMulai:           kontrak.TangalMulai,
-// 		TanggalSelesai:        kontrak.TanggalSelesai,
-// 		IdPks:                 kontrak.IdPks,
-// 		IdKoperasi:            kontrak.IdKoperasi,
-// 		Kuantitas:             kontrak.Kuantitas,
-// 		Harga:                 kontrak.Harga,
-// 		Status:                kontrak.Status.String(),
-// 		Pesan:                 kontrak.Pesan,
-// 		TanggalRespons:        kontrak.TanggalRespons,
-// 		KuantitasTepenuhi:     kontrak.KuantitasTepenuhi,
-// 		KuantitasTersisa:      kontrak.KuantitasTersisa,
-// 	}
-
-// 	return kontrakResponse, nil
-// }
+	return helper.ToKontrakResponse(ctx, kontrak), nil
+}
 
 // func (c *RantaiPasokChaincode) GetAllKontrakByIdPks(ctx contractapi.TransactionContextInterface, idPks string) ([]*web.KontrakResponse, error) {
 // 	err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"})

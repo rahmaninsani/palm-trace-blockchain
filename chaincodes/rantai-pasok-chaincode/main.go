@@ -9,7 +9,14 @@ import (
 )
 
 func main() {
-	rantaiPasokChaincode, err := contractapi.NewChaincode(&chaincode.RantaiPasokChaincode{})
+
+	chaincodes := []contractapi.ContractInterface{
+		chaincode.NewKebunChaincode(),
+		// chaincode.NewRantaiPasokChaincode(),
+	}
+
+	rantaiPasokChaincode, err := contractapi.NewChaincode(chaincodes...)
+
 	if err != nil {
 		log.Panicf("Error creating RantaiPasokChaincode: %v", err)
 	}

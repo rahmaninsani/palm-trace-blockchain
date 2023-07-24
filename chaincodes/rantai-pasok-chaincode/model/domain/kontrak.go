@@ -18,7 +18,8 @@ type Kontrak struct {
 	Status            constant.StatusPenawaranKontrak `json:"status"`
 	Pesan             string                          `json:"pesan"`
 	TanggalRespons    string                          `json:"tanggalRespons"`
-	DeliveryOrders    []DeliveryOrder                 `json:"deliveryOrders"`
 	KuantitasTepenuhi float32                         `json:"kuantitasTepenuhi"`
 	KuantitasTersisa  float32                         `json:"kuantitasTersisa"`
+	CreatedAt         string                          `json:"createdAt"`
+	UpdatedAt         string                          `json:"updatedAt"`
 }

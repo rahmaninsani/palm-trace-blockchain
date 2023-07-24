@@ -8,8 +8,12 @@ import (
 
 func CheckAffiliation(ctx contractapi.TransactionContextInterface, allowedAffiliations []string) error {
 	affiliation, isExist, err := ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
-	if !isExist || err != nil {
+	if err != nil {
 		return fmt.Errorf("failed to get client affiliation: %v", err)
+	}
+
+	if !isExist {
+		return fmt.Errorf("client affiliation is not found")
 	}
 
 	isAllowed := false
@@ -21,7 +25,7 @@ func CheckAffiliation(ctx contractapi.TransactionContextInterface, allowedAffili
 	}
 
 	if !isAllowed {
-		return fmt.Errorf("submitting client not authorized to create asset, does not have the required affiliation/role")
+		return fmt.Errorf("client affiliation %s is not allowed", affiliation)
 	}
 
 	return nil

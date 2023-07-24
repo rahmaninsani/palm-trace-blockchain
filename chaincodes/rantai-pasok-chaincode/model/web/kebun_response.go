@@ -10,5 +10,6 @@ type KebunResponse struct {
 	Luas                  float64 `json:"luas"`
 	NomorRspo             string  `json:"nomorRspo"`
 	SertifikatRspo        string  `json:"sertifikatRspo"`
+	CreatedAt             string  `json:"createdAt"`
 	UpdatedAt             string  `json:"updatedAt"`
 }
