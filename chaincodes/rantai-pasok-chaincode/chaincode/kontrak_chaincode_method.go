@@ -59,7 +59,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionCont
 		return nil, fmt.Errorf("failed to put kontrak on ledger: %v", err)
 	}
 
-	return helper.ToKontrakResponse(ctx, kontrak), nil
+	return helper.ToKontrakResponse(ctx, nil, kontrak), nil
 }
 
 func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionContextInterface, payload string) (*web.KontrakResponse, error) {
@@ -74,7 +74,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionCon
 
 	kontrakPrev, err := helper.GetAsset(ctx, kontrakConfirmRequest.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read kontrak from world state: %v", err)
+		return nil, fmt.Errorf("failed to get asset: %v", err)
 	}
 
 	if kontrakPrev == nil {
@@ -110,136 +110,129 @@ func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionCon
 		return nil, fmt.Errorf("failed to put kontrak on ledger: %v", err)
 	}
 
-	return helper.ToKontrakResponse(ctx, kontrak), nil
+	return helper.ToKontrakResponse(ctx, nil, kontrak), nil
 }
 
-// func (c *RantaiPasokChaincode) GetAllKontrakByIdPks(ctx contractapi.TransactionContextInterface, idPks string) ([]*web.KontrakResponse, error) {
-// 	err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"})
-// 	if err != nil {
-// 		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have pabrikkelapasawit.user affiliation/role")
-// 	}
+func (c *RantaiPasokChaincodeImpl) KontrakGetAllByIdPks(ctx contractapi.TransactionContextInterface, idPks string) ([]*web.KontrakResponse, error) {
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"}); err != nil {
+		return nil, fmt.Errorf("unauthorized: %v", err)
+	}
 
-// 	compositeKeyType := "Kontrak"
-// 	compositeKeyComponents := []string{idPks}
-// 	kontrakCompositeKey, err := helper.CreateCompositeKeyWithUnderscore(ctx, compositeKeyType, compositeKeyComponents)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to create composite key: %v", err)
-// 	}
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"assetType": %d,
+			"idPks": "%s"
+		}
+	}`, constant.AssetTypeKontrak, idPks)
 
-// 	// Dapatkan semua hasil yang cocok dengan kunci komposit "Kontrak:idPks"
-// 	kontrakResultsIterator, err := ctx.GetStub().GetStateByPartialCompositeKey(kontrakCompositeKey, []string{})
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to get kontrak by idPks: %v", err)
-// 	}
-// 	defer kontrakResultsIterator.Close()
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get kontrak for pks: %v", err)
+	}
 
-// 	// Buat slice untuk menyimpan hasil kontrak
-// 	var kontrakResponses []*web.KontrakResponse
+	if resultsIterator == nil {
+		return nil, fmt.Errorf("kontrak for pks with ID %s does not exist", idPks)
+	}
 
-// 	// Iterasi semua hasil dan tambahkan ke slice
-// 	for kontrakResultsIterator.HasNext() {
-// 		response, err := kontrakResultsIterator.Next()
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to iterate kontrak results: %v", err)
-// 		}
+	defer resultsIterator.Close()
 
-// 		// Konversi nilai hasil dari byte ke struct domain.Kontrak
-// 		var kontrak domain.Kontrak
-// 		err = json.Unmarshal(response.Value, &kontrak)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to unmarshal kontrak: %v", err)
-// 		}
+	var kontrakResponses []*web.KontrakResponse
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate through query results: %v", err)
+		}
 
-// 		// Buat kontrak response untuk dijadikan hasil respons
-// 		kontrakResponse := &web.KontrakResponse{
-// 			Id:                kontrak.Id,
-// 			Nomor:             kontrak.Nomor,
-// 			TanggalPembuatan:  kontrak.TanggalPembuatan,
-// 			TangalMulai:       kontrak.TangalMulai,
-// 			TanggalSelesai:    kontrak.TanggalSelesai,
-// 			IdPks:             kontrak.IdPks,
-// 			IdKoperasi:        kontrak.IdKoperasi,
-// 			Kuantitas:         kontrak.Kuantitas,
-// 			Harga:             kontrak.Harga,
-// 			Status:            kontrak.Status.String(),
-// 			Pesan:             kontrak.Pesan,
-// 			TanggalRespons:    kontrak.TanggalRespons,
-// 			DeliveryOrders:    kontrak.DeliveryOrders,
-// 			KuantitasTepenuhi: kontrak.KuantitasTepenuhi,
-// 			KuantitasTersisa:  kontrak.KuantitasTersisa,
-// 		}
+		var kontrak domain.Kontrak
+		if err = json.Unmarshal(response.Value, &kontrak); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal kontrak response: %v", err)
+		}
 
-// 		// Tambahkan kontrak response ke slice
-// 		kontrakResponses = append(kontrakResponses, kontrakResponse)
-// 	}
+		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, nil, kontrak))
+	}
 
-// 	return kontrakResponses, nil
-// }
+	return kontrakResponses, nil
+}
 
-// func (c *RantaiPasokChaincode) GetAllKontrakByIdKoperasi(ctx contractapi.TransactionContextInterface, idKoperasi string) ([]*web.KontrakResponse, error) {
-// 	err := helper.CheckAffiliation(ctx, []string{"koperasi.user", "petani.user"})
-// 	if err != nil {
-// 		return nil, fmt.Errorf("submitting client not authorized to create asset, does not have pabrikkelapasawit.user affiliation/role")
-// 	}
+func (c *RantaiPasokChaincodeImpl) KontrakGetAllByIdKoperasi(ctx contractapi.TransactionContextInterface, idKoperasi string) ([]*web.KontrakResponse, error) {
+	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user"}); err != nil {
+		return nil, fmt.Errorf("unauthorized: %v", err)
+	}
 
-// 	fmt.Println("idKoperasi: ", idKoperasi)
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"assetType": %d,
+			"idKoperasi": "%s"
+		}
+	}`, constant.AssetTypeKontrak, idKoperasi)
 
-// 	kontrakResultsIterator, _ := ctx.GetStub().GetStateByPartialCompositeKey("Kontrak", []string{"*", idKoperasi})
-// 	fmt.Println("1. kontrakResultsIterator.HasNext(): ", kontrakResultsIterator.HasNext())
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get kontrak for koperasi: %v", err)
+	}
 
-// 	kontrakResultsIterator, err = ctx.GetStub().GetStateByPartialCompositeKey("Kontrak", []string{"*", idKoperasi, "*"})
-// 	fmt.Println("2. kontrakResultsIterator.HasNext(): ", kontrakResultsIterator.HasNext())
+	if resultsIterator == nil {
+		return nil, fmt.Errorf("kontrak for koperasi with ID %s does not exist", idKoperasi)
+	}
 
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to get kontrak by idKoperasi: %v", err)
-// 	}
+	defer resultsIterator.Close()
 
-// 	defer kontrakResultsIterator.Close()
+	var kontrakResponses []*web.KontrakResponse
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate through query results: %v", err)
+		}
 
-// 	// Buat slice untuk menyimpan hasil kontrak
-// 	var kontrakResponses []*web.KontrakResponse
+		var kontrak domain.Kontrak
+		if err = json.Unmarshal(response.Value, &kontrak); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal kontrak response: %v", err)
+		}
 
-// 	// Iterasi semua hasil dan tambahkan ke slice
-// 	for kontrakResultsIterator.HasNext() {
-// 		response, err := kontrakResultsIterator.Next()
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to iterate kontrak results: %v", err)
-// 		}
+		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, nil, kontrak))
+	}
 
-// 		// Konversi nilai hasil dari byte ke struct domain.Kontrak
-// 		var kontrak domain.Kontrak
-// 		err = json.Unmarshal(response.Value, &kontrak)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to unmarshal kontrak: %v", err)
-// 		}
+	return kontrakResponses, nil
+}
 
-// 		// Cek apakah kontrak telah di-assign ke koperasi yang dimaksud
-// 		// if kontrak.IdKoperasi != idKoperasi {
-// 		// 	continue // Jika tidak di-assign, skip ke kontrak berikutnya
-// 		// }
+func (c *RantaiPasokChaincodeImpl) KontrakGetAllForPetani(ctx contractapi.TransactionContextInterface, idKoperasi string) ([]*web.KontrakResponse, error) {
+	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
+		return nil, fmt.Errorf("unauthorized: %v", err)
+	}
 
-// 		// Buat kontrak response untuk dijadikan hasil respons
-// 		kontrakResponse := &web.KontrakResponse{
-// 			Id:                kontrak.Id,
-// 			Nomor:             kontrak.Nomor,
-// 			TanggalPembuatan:  kontrak.TanggalPembuatan,
-// 			TangalMulai:       kontrak.TangalMulai,
-// 			TanggalSelesai:    kontrak.TanggalSelesai,
-// 			IdPks:             kontrak.IdPks,
-// 			IdKoperasi:        kontrak.IdKoperasi,
-// 			Kuantitas:         kontrak.Kuantitas,
-// 			Harga:             kontrak.Harga,
-// 			Status:            kontrak.Status.String(),
-// 			Pesan:             kontrak.Pesan,
-// 			TanggalRespons:    kontrak.TanggalRespons,
-// 			DeliveryOrders:    kontrak.DeliveryOrders,
-// 			KuantitasTepenuhi: kontrak.KuantitasTepenuhi,
-// 			KuantitasTersisa:  kontrak.KuantitasTersisa,
-// 		}
+	queryString := fmt.Sprintf(`{
+		"selector": {
+			"assetType": %d,
+			"idKoperasi": "%s",
+			"status": %d
+		}
+	}`, constant.AssetTypeKontrak, idKoperasi, constant.PenawaranKontrakDisetujui)
 
-// 		// Tambahkan kontrak response ke slice
-// 		kontrakResponses = append(kontrakResponses, kontrakResponse)
-// 	}
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get kontrak for koperasi: %v", err)
+	}
 
-// 	return kontrakResponses, nil
-// }
+	if resultsIterator == nil {
+		return nil, fmt.Errorf("kontrak for koperasi with ID %s does not exist", idKoperasi)
+	}
+
+	defer resultsIterator.Close()
+
+	var kontrakResponses []*web.KontrakResponse
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate through query results: %v", err)
+		}
+
+		var kontrak domain.Kontrak
+		if err = json.Unmarshal(response.Value, &kontrak); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal kontrak response: %v", err)
+		}
+
+		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, nil, kontrak))
+	}
+
+	return kontrakResponses, nil
+}

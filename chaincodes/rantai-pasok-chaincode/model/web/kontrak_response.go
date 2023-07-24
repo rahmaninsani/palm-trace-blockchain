@@ -1,7 +1,7 @@
 package web
 
 type KontrakResponse struct {
-	IdTransaksiBlockchain string  `json:"idTransaksiBlockchain"`
+	IdTransaksiBlockchain string  `json:"idTransaksiBlockchain,omitempty" metadata:",optional"`
 	Id                    string  `json:"id"`
 	IdPks                 string  `json:"idPks"`
 	IdKoperasi            string  `json:"idKoperasi"`

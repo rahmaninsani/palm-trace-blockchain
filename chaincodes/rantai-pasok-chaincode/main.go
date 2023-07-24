@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-
 	"rantai-pasok-chaincode/chaincode"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
@@ -10,12 +9,7 @@ import (
 
 func main() {
 
-	chaincodes := []contractapi.ContractInterface{
-		chaincode.NewKebunChaincode(),
-		// chaincode.NewRantaiPasokChaincode(),
-	}
-
-	rantaiPasokChaincode, err := contractapi.NewChaincode(chaincodes...)
+	rantaiPasokChaincode, err := contractapi.NewChaincode(chaincode.NewRantaiPasokChaincode())
 
 	if err != nil {
 		log.Panicf("Error creating RantaiPasokChaincode: %v", err)

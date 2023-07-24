@@ -11,17 +11,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-type KebunChaincodeImpl struct {
-	contractapi.Contract
-}
-
-func NewKebunChaincode() contractapi.ContractInterface {
-	return &KebunChaincodeImpl{
-		Contract: contractapi.Contract{},
-	}
-}
-
-func (c *KebunChaincodeImpl) KebunCreate(ctx contractapi.TransactionContextInterface, payload string) (*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContextInterface, payload string) (*web.KebunResponse, error) {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
 		return nil, fmt.Errorf("unauthorized: %v", err)
 	}
@@ -63,10 +53,10 @@ func (c *KebunChaincodeImpl) KebunCreate(ctx contractapi.TransactionContextInter
 		return nil, fmt.Errorf("failed to put kebun on ledger: %v", err)
 	}
 
-	return helper.ToKebunResponse(ctx, kebun), nil
+	return helper.ToKebunResponse(ctx, nil, kebun), nil
 }
 
-func (c *KebunChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContextInterface, payload string) (*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContextInterface, payload string) (*web.KebunResponse, error) {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
 		return nil, fmt.Errorf("unauthorized: %v", err)
 	}
@@ -111,10 +101,10 @@ func (c *KebunChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContextInter
 		return nil, fmt.Errorf("failed to put kebun on ledger: %v", err)
 	}
 
-	return helper.ToKebunResponse(ctx, kebun), nil
+	return helper.ToKebunResponse(ctx, nil, kebun), nil
 }
 
-func (c *KebunChaincodeImpl) KebunGetAllByIdPetani(ctx contractapi.TransactionContextInterface, idPetani string) ([]*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunGetAllByIdPetani(ctx contractapi.TransactionContextInterface, idPetani string) ([]*web.KebunResponse, error) {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
 		return nil, fmt.Errorf("unauthorized: %v", err)
 	}
@@ -144,19 +134,18 @@ func (c *KebunChaincodeImpl) KebunGetAllByIdPetani(ctx contractapi.TransactionCo
 			return nil, fmt.Errorf("failed to iterate through query results: %v", err)
 		}
 
-		var kebunResponse web.KebunResponse
-		err = json.Unmarshal(response.Value, &kebunResponse)
-		if err != nil {
+		var kebun domain.Kebun
+		if err = json.Unmarshal(response.Value, &kebun); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal kebun response: %v", err)
 		}
 
-		kebunResponses = append(kebunResponses, &kebunResponse)
+		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, nil, kebun))
 	}
 
 	return kebunResponses, nil
 }
 
-func (c *KebunChaincodeImpl) KebunGetHistoryById(ctx contractapi.TransactionContextInterface, payload string) ([]*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunGetHistoryById(ctx contractapi.TransactionContextInterface, payload string) ([]*web.KebunResponse, error) {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
 		return nil, fmt.Errorf("unauthorized: %v", err)
 	}
@@ -201,14 +190,12 @@ func (c *KebunChaincodeImpl) KebunGetHistoryById(ctx contractapi.TransactionCont
 			return nil, fmt.Errorf("failed to iterate history for key %s: %v", kebunHistoryRequest.IdKebun, err)
 		}
 
-		var kebunResponse web.KebunResponse
-		err = json.Unmarshal(response.Value, &kebunResponse)
-		if err != nil {
+		var kebun domain.Kebun
+		if err = json.Unmarshal(response.Value, &kebun); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal kebun response: %v", err)
 		}
 
-		kebunResponse.IdTransaksiBlockchain = response.GetTxId()
-		kebunResponses = append(kebunResponses, &kebunResponse)
+		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, response, kebun))
 	}
 
 	return kebunResponses, nil
