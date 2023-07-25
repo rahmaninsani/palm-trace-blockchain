@@ -18,9 +18,13 @@ type KontrakCreateRequest struct {
 
 type KontrakConfirmRequest struct {
 	Id             string                          `json:"id"`
-	IdKoperasi     string                          `json:"idKoperasi"`
 	Status         constant.StatusPenawaranKontrak `json:"status"`
 	Pesan          string                          `json:"pesan"`
 	TanggalRespons string                          `json:"tanggalRespons"`
 	UpdatedAt      string                          `json:"updatedAt"`
+}
+
+type KontrakFindAllRequest struct {
+	IdPks      string `json:"idPks"`
+	IdKoperasi string `json:"idKoperasi"`
 }

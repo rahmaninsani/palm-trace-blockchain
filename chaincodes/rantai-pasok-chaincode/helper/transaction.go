@@ -1,16 +1,14 @@
 package helper
 
 import (
-	"fmt"
-
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"encoding/json"
 )
 
-func GetAsset(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
-	asset, err := ctx.GetStub().GetState(id)
+func BuildQueryString(query map[string]interface{}) (string, error) {
+	queryJSON, err := json.Marshal(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read from world state")
+		return "", err
 	}
 
-	return asset, nil
+	return string(queryJSON), nil
 }

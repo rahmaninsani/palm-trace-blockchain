@@ -4,6 +4,7 @@ import "rantai-pasok-chaincode/constant"
 
 type DeliveryOrder struct {
 	Id               string                                `json:"id"`
+	AssetType        constant.AssetType                    `json:"assetType"`
 	IdKontrak        string                                `json:"idKontrak"`
 	Nomor            string                                `json:"nomor"`
 	TanggalPembuatan string                                `json:"tanggalPembuatan"`
@@ -14,5 +15,6 @@ type DeliveryOrder struct {
 	Status           constant.StatusPenawaranDeliveryOrder `json:"status"`
 	Pesan            string                                `json:"pesan"`
 	TanggalRespons   string                                `json:"tanggalRespons"`
-	Transactions     []Transaksi                           `json:"transactions"`
+	CreatedAt        string                                `json:"createdAt"`
+	UpdatedAt        string                                `json:"updatedAt"`
 }

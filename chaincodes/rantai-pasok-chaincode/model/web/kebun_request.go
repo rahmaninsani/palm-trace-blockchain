@@ -15,7 +15,6 @@ type KebunCreateRequest struct {
 
 type KebunUpdateRequest struct {
 	Id             string  `json:"id"`
-	IdPetani       string  `json:"idPetani"`
 	Alamat         string  `json:"alamat"`
 	Latitude       string  `json:"latitude"`
 	Longitude      string  `json:"longitude"`
@@ -23,9 +22,4 @@ type KebunUpdateRequest struct {
 	NomorRspo      string  `json:"nomorRspo"`
 	SertifikatRspo string  `json:"sertifikatRspo"`
 	UpdatedAt      string  `json:"updatedAt"`
-}
-
-type KebunHistoryRequest struct {
-	IdPetani string `json:"idPetani"`
-	IdKebun  string `json:"idKebun"`
 }

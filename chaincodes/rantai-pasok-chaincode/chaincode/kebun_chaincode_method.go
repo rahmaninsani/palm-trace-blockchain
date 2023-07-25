@@ -2,7 +2,7 @@ package chaincode
 
 import (
 	"encoding/json"
-	"fmt"
+	"net/http"
 	"rantai-pasok-chaincode/constant"
 	"rantai-pasok-chaincode/helper"
 	"rantai-pasok-chaincode/model/domain"
@@ -11,23 +11,14 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContextInterface, payload string) (*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
-		return nil, fmt.Errorf("unauthorized: %v", err)
+		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
 	}
 
 	var kebunCreateRequest web.KebunCreateRequest
 	if err := json.Unmarshal([]byte(payload), &kebunCreateRequest); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal payload: %v", err)
-	}
-
-	kebunPrev, err := helper.GetAsset(ctx, kebunCreateRequest.Id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get asset: %v", err)
-	}
-
-	if kebunPrev != nil {
-		return nil, fmt.Errorf("the asset %s already exists", kebunCreateRequest.Id)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	kebun := domain.Kebun{
@@ -46,42 +37,40 @@ func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContex
 
 	kebunJSON, err := json.Marshal(kebun)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal kebun: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	if err = ctx.GetStub().PutState(kebun.Id, kebunJSON); err != nil {
-		return nil, fmt.Errorf("failed to put kebun on ledger: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
-	return helper.ToKebunResponse(ctx, nil, kebun), nil
+	kebunResponse := helper.ToKebunResponse(ctx, nil, kebun)
+
+	return helper.ToWebResponse(http.StatusCreated, "Created", kebunResponse)
 }
 
-func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContextInterface, payload string) (*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
-		return nil, fmt.Errorf("unauthorized: %v", err)
+		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
 	}
 
 	var kebunUpdateRequest web.KebunUpdateRequest
 	if err := json.Unmarshal([]byte(payload), &kebunUpdateRequest); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal payload: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
-	kebunPrev, err := helper.GetAsset(ctx, kebunUpdateRequest.Id)
+	kebunPrevBytes, err := ctx.GetStub().GetState(kebunUpdateRequest.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get asset: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
-	if kebunPrev == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", kebunUpdateRequest.Id)
+	if kebunPrevBytes == nil {
+		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
 	}
 
 	var kebun domain.Kebun
-	if err = json.Unmarshal(kebunPrev, &kebun); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal kebun: %v", err)
-	}
-
-	if kebun.IdPetani != kebunUpdateRequest.IdPetani {
-		return nil, fmt.Errorf("the asset %s is not assigned to the petani %s", kebun.Id, kebunUpdateRequest.IdPetani)
+	if err = json.Unmarshal(kebunPrevBytes, &kebun); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	kebun.Alamat = kebunUpdateRequest.Alamat
@@ -94,35 +83,42 @@ func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContex
 
 	kebunJSON, err := json.Marshal(kebun)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal kebun: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	if err = ctx.GetStub().PutState(kebun.Id, kebunJSON); err != nil {
-		return nil, fmt.Errorf("failed to put kebun on ledger: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
-	return helper.ToKebunResponse(ctx, nil, kebun), nil
+	kebunResponse := helper.ToKebunResponse(ctx, nil, kebun)
+
+	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponse)
 }
 
-func (c *RantaiPasokChaincodeImpl) KebunGetAllByIdPetani(ctx contractapi.TransactionContextInterface, idPetani string) ([]*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunFindAll(ctx contractapi.TransactionContextInterface, idPetani string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
-		return nil, fmt.Errorf("unauthorized: %v", err)
+		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
 	}
 
-	queryString := fmt.Sprintf(`{
-		"selector": {
-			"assetType": %d,
-			"idPetani": "%s"
-		}
-	}`, constant.AssetTypeKebun, idPetani)
+	query := map[string]interface{}{
+		"selector": map[string]interface{}{
+			"assetType": constant.AssetTypeKebun,
+			"idPetani":  idPetani,
+		},
+	}
+
+	queryString, err := helper.BuildQueryString(query)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+	}
 
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get kebun for petani: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	if resultsIterator == nil {
-		return nil, fmt.Errorf("kebun for petani with ID %s does not exist", idPetani)
+		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
 	}
 
 	defer resultsIterator.Close()
@@ -131,54 +127,57 @@ func (c *RantaiPasokChaincodeImpl) KebunGetAllByIdPetani(ctx contractapi.Transac
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return nil, fmt.Errorf("failed to iterate through query results: %v", err)
+			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		var kebun domain.Kebun
 		if err = json.Unmarshal(response.Value, &kebun); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal kebun response: %v", err)
+			helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, nil, kebun))
 	}
 
-	return kebunResponses, nil
+	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponses)
 }
 
-func (c *RantaiPasokChaincodeImpl) KebunGetHistoryById(ctx contractapi.TransactionContextInterface, payload string) ([]*web.KebunResponse, error) {
+func (c *RantaiPasokChaincodeImpl) KebunFindOne(ctx contractapi.TransactionContextInterface, idKebun string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
-		return nil, fmt.Errorf("unauthorized: %v", err)
+		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
 	}
 
-	var kebunHistoryRequest web.KebunHistoryRequest
-	if err := json.Unmarshal([]byte(payload), &kebunHistoryRequest); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal object: %v", err)
-	}
-
-	queryString := fmt.Sprintf(`{
-		"selector": {
-			"assetType": %d,
-			"idPetani": "%s",
-			"idKebun": "%s"
-		}
-	}`, constant.AssetTypeKebun, kebunHistoryRequest.IdPetani, kebunHistoryRequest.IdKebun)
-
-	kebunPrev, err := ctx.GetStub().GetQueryResult(queryString)
+	kebunPrevBytes, err := ctx.GetStub().GetState(idKebun)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get kebun for petani: %v", err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
-	if kebunPrev == nil {
-		return nil, fmt.Errorf("kebun with ID %s does not exist", kebunHistoryRequest.IdKebun)
+	if kebunPrevBytes == nil {
+		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
 	}
 
-	resultsIterator, err := ctx.GetStub().GetHistoryForKey(kebunHistoryRequest.IdKebun)
+	var kebun domain.Kebun
+	err = json.Unmarshal(kebunPrevBytes, &kebun)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get history for kebun with ID %s: %v", kebunHistoryRequest.IdKebun, err)
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+	}
+
+	kebunResponse := helper.ToKebunResponse(nil, nil, kebun)
+
+	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponse)
+}
+
+func (c *RantaiPasokChaincodeImpl) KebunFindOneHistory(ctx contractapi.TransactionContextInterface, idKebun string) *web.WebResponse {
+	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
+		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+	}
+
+	resultsIterator, err := ctx.GetStub().GetHistoryForKey(idKebun)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	if resultsIterator == nil {
-		return nil, fmt.Errorf("kebun with ID %s does not exist", kebunHistoryRequest.IdKebun)
+		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
 	}
 
 	defer resultsIterator.Close()
@@ -187,16 +186,16 @@ func (c *RantaiPasokChaincodeImpl) KebunGetHistoryById(ctx contractapi.Transacti
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return nil, fmt.Errorf("failed to iterate history for key %s: %v", kebunHistoryRequest.IdKebun, err)
+			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		var kebun domain.Kebun
 		if err = json.Unmarshal(response.Value, &kebun); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal kebun response: %v", err)
+			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, response, kebun))
 	}
 
-	return kebunResponses, nil
+	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponses)
 }
