@@ -13,12 +13,12 @@ import (
 
 func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var kebunCreateRequest web.KebunCreateRequest
 	if err := json.Unmarshal([]byte(payload), &kebunCreateRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kebun := domain.Kebun{
@@ -37,40 +37,40 @@ func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContex
 
 	kebunJSON, err := json.Marshal(kebun)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if err = ctx.GetStub().PutState(kebun.Id, kebunJSON); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kebunResponse := helper.ToKebunResponse(ctx, nil, kebun)
 
-	return helper.ToWebResponse(http.StatusCreated, "Created", kebunResponse)
+	return helper.ToWebResponse(http.StatusCreated, kebunResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var kebunUpdateRequest web.KebunUpdateRequest
 	if err := json.Unmarshal([]byte(payload), &kebunUpdateRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kebunPrevBytes, err := ctx.GetStub().GetState(kebunUpdateRequest.Id)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if kebunPrevBytes == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
 	}
 
 	var kebun domain.Kebun
 	if err = json.Unmarshal(kebunPrevBytes, &kebun); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kebun.Alamat = kebunUpdateRequest.Alamat
@@ -83,21 +83,21 @@ func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContex
 
 	kebunJSON, err := json.Marshal(kebun)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if err = ctx.GetStub().PutState(kebun.Id, kebunJSON); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kebunResponse := helper.ToKebunResponse(ctx, nil, kebun)
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponse)
+	return helper.ToWebResponse(http.StatusOK, kebunResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KebunFindAll(ctx contractapi.TransactionContextInterface, idPetani string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	query := map[string]interface{}{
@@ -109,93 +109,93 @@ func (c *RantaiPasokChaincodeImpl) KebunFindAll(ctx contractapi.TransactionConte
 
 	queryString, err := helper.BuildQueryString(query)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
-	}
-
-	if resultsIterator == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	defer resultsIterator.Close()
+
+	if !resultsIterator.HasNext() {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
 
 	var kebunResponses []*web.KebunResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		var kebun domain.Kebun
 		if err = json.Unmarshal(response.Value, &kebun); err != nil {
-			helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, nil, kebun))
 	}
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponses)
+	return helper.ToWebResponse(http.StatusOK, kebunResponses, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KebunFindOne(ctx contractapi.TransactionContextInterface, idKebun string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	kebunPrevBytes, err := ctx.GetStub().GetState(idKebun)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, err, nil)
 	}
 
 	if kebunPrevBytes == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
 	}
 
 	var kebun domain.Kebun
 	err = json.Unmarshal(kebunPrevBytes, &kebun)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kebunResponse := helper.ToKebunResponse(nil, nil, kebun)
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponse)
+	return helper.ToWebResponse(http.StatusOK, kebunResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KebunFindOneHistory(ctx contractapi.TransactionContextInterface, idKebun string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	resultsIterator, err := ctx.GetStub().GetHistoryForKey(idKebun)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
-	}
-
-	if resultsIterator == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	defer resultsIterator.Close()
+
+	if !resultsIterator.HasNext() {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
 
 	var kebunResponses []*web.KebunResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		var kebun domain.Kebun
 		if err = json.Unmarshal(response.Value, &kebun); err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, response, kebun))
 	}
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kebunResponses)
+	return helper.ToWebResponse(http.StatusOK, kebunResponses, nil)
 }

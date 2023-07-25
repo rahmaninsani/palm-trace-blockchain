@@ -13,12 +13,12 @@ import (
 
 func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var kontrakCreateRequest web.KontrakCreateRequest
 	if err := json.Unmarshal([]byte(payload), &kontrakCreateRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kontrak := domain.Kontrak{
@@ -43,40 +43,40 @@ func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionCont
 
 	kontrakJSON, err := json.Marshal(kontrak)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if err = ctx.GetStub().PutState(kontrak.Id, kontrakJSON); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kontrakResponse := helper.ToKontrakResponse(ctx, nil, kontrak)
 
-	return helper.ToWebResponse(http.StatusCreated, "Created", kontrakResponse)
+	return helper.ToWebResponse(http.StatusCreated, kontrakResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var kontrakConfirmRequest web.KontrakConfirmRequest
 	if err := json.Unmarshal([]byte(payload), &kontrakConfirmRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kontrakPrevBytes, err := ctx.GetStub().GetState(kontrakConfirmRequest.Id)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if kontrakPrevBytes == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
 	}
 
 	var kontrak domain.Kontrak
 	if err = json.Unmarshal(kontrakPrevBytes, &kontrak); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kontrak.Status = kontrakConfirmRequest.Status
@@ -87,26 +87,26 @@ func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionCon
 
 	kontrakJSON, err := json.Marshal(kontrak)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if err = ctx.GetStub().PutState(kontrak.Id, kontrakJSON); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kontrakResponse := helper.ToKontrakResponse(ctx, nil, kontrak)
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kontrakResponse)
+	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KontrakFindAll(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
-	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var kontrakFindAllRequest web.KontrakFindAllRequest
 	if err := json.Unmarshal([]byte(payload), &kontrakFindAllRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	query := map[string]interface{}{
@@ -123,95 +123,99 @@ func (c *RantaiPasokChaincodeImpl) KontrakFindAll(ctx contractapi.TransactionCon
 		query["selector"].(map[string]interface{})["idKoperasi"] = kontrakFindAllRequest.IdKoperasi
 	}
 
+	if kontrakFindAllRequest.Status != -1 {
+		query["selector"].(map[string]interface{})["status"] = kontrakFindAllRequest.Status
+	}
+
 	queryString, err := helper.BuildQueryString(query)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
-	}
-
-	if resultsIterator == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	defer resultsIterator.Close()
+
+	if !resultsIterator.HasNext() {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
 
 	var kontrakResponses []*web.KontrakResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		var kontrak domain.Kontrak
 		if err = json.Unmarshal(response.Value, &kontrak); err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, nil, kontrak))
 	}
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kontrakResponses)
+	return helper.ToWebResponse(http.StatusOK, kontrakResponses, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KontrakFindOne(ctx contractapi.TransactionContextInterface, idKontrak string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	kontrakPrevBytes, err := ctx.GetStub().GetState(idKontrak)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if kontrakPrevBytes == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
 	}
 
 	var kontrak domain.Kontrak
 	err = json.Unmarshal(kontrakPrevBytes, &kontrak)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	kontrakResponse := helper.ToKontrakResponse(nil, nil, kontrak)
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kontrakResponse)
+	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) KontrakFindOneHistory(ctx contractapi.TransactionContextInterface, idKontrak string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	resultsIterator, err := ctx.GetStub().GetHistoryForKey(idKontrak)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
-	}
-
-	if resultsIterator == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	defer resultsIterator.Close()
+
+	if !resultsIterator.HasNext() {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
 
 	var kontrakResponses []*web.KontrakResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		var kontrak domain.Kontrak
 		if err = json.Unmarshal(response.Value, &kontrak); err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, response, kontrak))
 	}
 
-	return helper.ToWebResponse(http.StatusOK, "OK", kontrakResponses)
+	return helper.ToWebResponse(http.StatusOK, kontrakResponses, nil)
 }

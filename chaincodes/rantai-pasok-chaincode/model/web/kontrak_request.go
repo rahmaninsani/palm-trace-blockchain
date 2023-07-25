@@ -25,6 +25,7 @@ type KontrakConfirmRequest struct {
 }
 
 type KontrakFindAllRequest struct {
-	IdPks      string `json:"idPks"`
-	IdKoperasi string `json:"idKoperasi"`
+	IdPks      string                          `json:"idPks"`
+	IdKoperasi string                          `json:"idKoperasi"`
+	Status     constant.StatusPenawaranKontrak `json:"status"`
 }

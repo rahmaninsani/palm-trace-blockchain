@@ -13,12 +13,12 @@ import (
 
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderCreate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var deliveryOrderCreateRequest web.DeliveryOrderCreateRequest
 	if err := json.Unmarshal([]byte(payload), &deliveryOrderCreateRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	deliveryOrder := domain.DeliveryOrder{
@@ -40,40 +40,40 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderCreate(ctx contractapi.Transacti
 
 	deliveryOrderJSON, err := json.Marshal(deliveryOrder)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if err = ctx.GetStub().PutState(deliveryOrder.Id, deliveryOrderJSON); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	deliveryResponse := helper.ToDeliveryOrderResponse(ctx, nil, deliveryOrder)
 
-	return helper.ToWebResponse(http.StatusCreated, "Created", deliveryResponse)
+	return helper.ToWebResponse(http.StatusCreated, deliveryResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderConfirm(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var deliveryOrderConfirmRequest web.DeliveryOrderConfirmRequest
 	if err := json.Unmarshal([]byte(payload), &deliveryOrderConfirmRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	deliveryOrderPrevBytes, err := ctx.GetStub().GetState(deliveryOrderConfirmRequest.Id)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if deliveryOrderPrevBytes == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
 	}
 
 	var deliveryOrder domain.DeliveryOrder
 	if err = json.Unmarshal(deliveryOrderPrevBytes, &deliveryOrder); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	deliveryOrder.Status = deliveryOrderConfirmRequest.Status
@@ -83,26 +83,26 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderConfirm(ctx contractapi.Transact
 
 	deliveryOrderJSON, err := json.Marshal(deliveryOrder)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if err = ctx.GetStub().PutState(deliveryOrder.Id, deliveryOrderJSON); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	deliveryOrderResponse := helper.ToDeliveryOrderResponse(ctx, nil, deliveryOrder)
 
-	return helper.ToWebResponse(http.StatusOK, "OK", deliveryOrderResponse)
+	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindAll(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	var deliveryOrderFindAllRequest web.DeliveryOrderFindAllRequest
 	if err := json.Unmarshal([]byte(payload), &deliveryOrderFindAllRequest); err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	query := map[string]interface{}{
@@ -118,93 +118,93 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindAll(ctx contractapi.Transact
 
 	queryString, err := helper.BuildQueryString(query)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
-	}
-
-	if resultsIterator == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	defer resultsIterator.Close()
+
+	if !resultsIterator.HasNext() {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
 
 	var deliveryOrderResponses []*web.DeliveryOrderResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		var deliveryOrder domain.DeliveryOrder
 		if err = json.Unmarshal(response.Value, &deliveryOrder); err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		deliveryOrderResponses = append(deliveryOrderResponses, helper.ToDeliveryOrderResponse(nil, nil, deliveryOrder))
 	}
 
-	return helper.ToWebResponse(http.StatusOK, "OK", deliveryOrderResponses)
+	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponses, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindOne(ctx contractapi.TransactionContextInterface, idDeliveryOrder string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	deliveryOrderPrevBytes, err := ctx.GetStub().GetState(idDeliveryOrder)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	if deliveryOrderPrevBytes == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
 	}
 
 	var deliveryOrder domain.DeliveryOrder
 	err = json.Unmarshal(deliveryOrderPrevBytes, &deliveryOrder)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	deliveryResponse := helper.ToDeliveryOrderResponse(nil, nil, deliveryOrder)
 
-	return helper.ToWebResponse(http.StatusOK, "OK", deliveryResponse)
+	return helper.ToWebResponse(http.StatusOK, deliveryResponse, nil)
 }
 
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindOneHistory(ctx contractapi.TransactionContextInterface, idDeliveryOrder string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
-		return helper.ToWebResponse(http.StatusUnauthorized, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
 	resultsIterator, err := ctx.GetStub().GetHistoryForKey(idDeliveryOrder)
 	if err != nil {
-		return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
-	}
-
-	if resultsIterator == nil {
-		return helper.ToWebResponse(http.StatusNotFound, err.Error(), nil)
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
 	defer resultsIterator.Close()
+
+	if !resultsIterator.HasNext() {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
 
 	var deliveryOrderResponses []*web.DeliveryOrderResponse
 	for resultsIterator.HasNext() {
 		response, err := resultsIterator.Next()
 		if err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		var deliveryOrder domain.DeliveryOrder
 		if err = json.Unmarshal(response.Value, &deliveryOrder); err != nil {
-			return helper.ToWebResponse(http.StatusInternalServerError, err.Error(), nil)
+			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
 		deliveryOrderResponses = append(deliveryOrderResponses, helper.ToDeliveryOrderResponse(nil, response, deliveryOrder))
 	}
 
-	return helper.ToWebResponse(http.StatusOK, "OK", deliveryOrderResponses)
+	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponses, nil)
 }

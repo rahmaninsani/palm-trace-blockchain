@@ -8,11 +8,17 @@ import (
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
 )
 
-func ToWebResponse(code int, message string, data interface{}) *web.WebResponse {
+func ToWebResponse(status int, data interface{}, err error) *web.WebResponse {
 	webResponse := &web.WebResponse{
-		Code:    code,
-		Message: message,
-		Data:    data,
+		Status: status,
+	}
+
+	if data != nil {
+		webResponse.Data = data
+	}
+
+	if err != nil {
+		webResponse.Message = err.Error()
 	}
 
 	return webResponse
