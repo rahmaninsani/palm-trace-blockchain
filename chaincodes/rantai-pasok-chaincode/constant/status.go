@@ -84,32 +84,38 @@ func (statusPenawaranTransaksi StatusPenawaranTransaksi) String() string {
 type StatusTransaksi int
 
 const (
-	TransaksiDitawarkanPetani  StatusTransaksi = iota // 0
-	TransaksiDisetujuiKoperasi                        // 1
-	TransaksiDitolakKoperasi                          // 2
-	TransaksiDisetujuiPks                             // 3
-	TransaksiDitolakPks                               // 4
-	TransaksiDikirimPetani                            // 5
-	TransaksiDiterimaKoperasi                         // 6
-	TransaksiDikirimKoperasi                          // 7
-	TransaksiDiterimaPks                              // 8
-	TransaksiDibayarPks                               // 9
-	TransaksiDibayarKoperasi                          // 10
-	TransaksiSelesai                                  // 11
+	TransaksiMenungguKonfirmasiKoperasi StatusTransaksi = iota // 0
+	TransaksiDisetujuiKoperasi                                 // 1
+	TransaksiDitolakKoperasi                                   // 2
+	TransaksiMenungguKonfirmasiPks                             // 3
+	TransaksiDisetujuiPks                                      // 4
+	TransaksiDitolakPks                                        // 5
+	TransaksiMenungguDikirimPetani
+	TransaksiDikirimPetani    // 6
+	TransaksiDiterimaKoperasi // 7
+	TransaksiDikirimKoperasi  // 8
+	TransaksiDiterimaPks      // 9
+	TransaksiDibayarPks       // 10
+	TransaksiDibayarKoperasi  // 11
+	TransaksiSelesai          // 12
 )
 
 func (status StatusTransaksi) String() string {
 	switch status {
-	case TransaksiDitawarkanPetani:
-		return "Ditawarkan Petani"
+	case TransaksiMenungguKonfirmasiKoperasi:
+		return "Menunggu Konfirmasi Koperasi"
 	case TransaksiDisetujuiKoperasi:
 		return "Disetujui Koperasi"
 	case TransaksiDitolakKoperasi:
 		return "Ditolak Koperasi"
+	case TransaksiMenungguKonfirmasiPks:
+		return "Menunggu Konfirmasi Pabrik Kelapa Sawit"
 	case TransaksiDisetujuiPks:
 		return "Disetujui Pabrik Kelapa Sawit"
 	case TransaksiDitolakPks:
 		return "Ditolak Pabrik Kelapa Sawit"
+	case TransaksiMenungguDikirimPetani:
+		return "Menunggu Dikirim Petani"
 	case TransaksiDikirimPetani:
 		return "Dikirim Petani"
 	case TransaksiDiterimaKoperasi:

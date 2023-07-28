@@ -47,7 +47,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderCreate(ctx contractapi.Transacti
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	deliveryResponse := helper.ToDeliveryOrderResponse(ctx, nil, deliveryOrder)
+	deliveryResponse := helper.ToDeliveryOrderResponse(ctx, nil, &deliveryOrder)
 
 	return helper.ToWebResponse(http.StatusCreated, deliveryResponse, nil)
 }
@@ -90,7 +90,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderConfirm(ctx contractapi.Transact
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	deliveryOrderResponse := helper.ToDeliveryOrderResponse(ctx, nil, deliveryOrder)
+	deliveryOrderResponse := helper.ToDeliveryOrderResponse(ctx, nil, &deliveryOrder)
 
 	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponse, nil)
 }
@@ -144,7 +144,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindAll(ctx contractapi.Transact
 			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
-		deliveryOrderResponses = append(deliveryOrderResponses, helper.ToDeliveryOrderResponse(nil, nil, deliveryOrder))
+		deliveryOrderResponses = append(deliveryOrderResponses, helper.ToDeliveryOrderResponse(nil, nil, &deliveryOrder))
 	}
 
 	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponses, nil)
@@ -170,7 +170,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindOne(ctx contractapi.Transact
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	deliveryResponse := helper.ToDeliveryOrderResponse(nil, nil, deliveryOrder)
+	deliveryResponse := helper.ToDeliveryOrderResponse(nil, nil, &deliveryOrder)
 
 	return helper.ToWebResponse(http.StatusOK, deliveryResponse, nil)
 }
@@ -203,7 +203,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindOneHistory(ctx contractapi.T
 			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
-		deliveryOrderResponses = append(deliveryOrderResponses, helper.ToDeliveryOrderResponse(nil, response, deliveryOrder))
+		deliveryOrderResponses = append(deliveryOrderResponses, helper.ToDeliveryOrderResponse(nil, response, &deliveryOrder))
 	}
 
 	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponses, nil)

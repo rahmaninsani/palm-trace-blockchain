@@ -24,7 +24,7 @@ func ToWebResponse(status int, data interface{}, err error) *web.WebResponse {
 	return webResponse
 }
 
-func ToKebunResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, kebun domain.Kebun) *web.KebunResponse {
+func ToKebunResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, kebun *domain.Kebun) *web.KebunResponse {
 	kebunResponse := &web.KebunResponse{
 		Id:             kebun.Id,
 		IdPetani:       kebun.IdPetani,
@@ -49,7 +49,7 @@ func ToKebunResponse(ctx contractapi.TransactionContextInterface, keyModificatio
 	return kebunResponse
 }
 
-func ToKontrakResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, kontrak domain.Kontrak) *web.KontrakResponse {
+func ToKontrakResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, kontrak *domain.Kontrak) *web.KontrakResponse {
 	kontrakResponse := &web.KontrakResponse{
 		Id:                kontrak.Id,
 		IdPks:             kontrak.IdPks,
@@ -80,7 +80,7 @@ func ToKontrakResponse(ctx contractapi.TransactionContextInterface, keyModificat
 	return kontrakResponse
 }
 
-func ToDeliveryOrderResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, deliveryOrder domain.DeliveryOrder) *web.DeliveryOrderResponse {
+func ToDeliveryOrderResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, deliveryOrder *domain.DeliveryOrder) *web.DeliveryOrderResponse {
 	deliveryOrderResponse := &web.DeliveryOrderResponse{
 		Id:               deliveryOrder.Id,
 		IdKontrak:        deliveryOrder.IdKontrak,
@@ -106,4 +106,55 @@ func ToDeliveryOrderResponse(ctx contractapi.TransactionContextInterface, keyMod
 	}
 
 	return deliveryOrderResponse
+}
+
+func ToTransaksiResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, transaksi *domain.Transaksi) *web.TransaksiResponse {
+	transaksiResponse := &web.TransaksiResponse{
+		Id:                     transaksi.Id,
+		IdDeliveryOrder:        transaksi.IdDeliveryOrder,
+		IdPetani:               transaksi.IdPetani,
+		Nomor:                  transaksi.Nomor,
+		TanggalPembuatan:       transaksi.TanggalPembuatan,
+		StatusKoperasi:         transaksi.StatusKoperasi.String(),
+		PesanKoperasi:          transaksi.PesanKoperasi,
+		TanggalResponsKoperasi: transaksi.TanggalResponsKoperasi,
+		StatusPks:              transaksi.StatusPks.String(),
+		PesanPks:               transaksi.PesanPks,
+		TanggalResponsPks:      transaksi.TanggalResponsPks,
+		Status:                 transaksi.Status.String(),
+		CreatedAt:              transaksi.CreatedAt,
+		UpdatedAt:              transaksi.UpdatedAt,
+	}
+
+	if ctx != nil {
+		transaksiResponse.IdTransaksiBlockchain = ctx.GetStub().GetTxID()
+	}
+
+	if keyModification != nil {
+		transaksiResponse.IdTransaksiBlockchain = keyModification.GetTxId()
+	}
+
+	return transaksiResponse
+}
+
+func ToTransaksiItemResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, transaksiItem *domain.TransaksiItem) *web.TransaksiItemResponse {
+	transaksiItemResponse := &web.TransaksiItemResponse{
+		Id:          transaksiItem.Id,
+		IdTransaksi: transaksiItem.IdTransaksi,
+		IdKebun:     transaksiItem.IdKebun,
+		Kuantitas:   transaksiItem.Kuantitas,
+		Harga:       transaksiItem.Harga,
+		CreatedAt:   transaksiItem.CreatedAt,
+		UpdatedAt:   transaksiItem.UpdatedAt,
+	}
+
+	if ctx != nil {
+		transaksiItemResponse.IdTransaksiBlockchain = ctx.GetStub().GetTxID()
+	}
+
+	if keyModification != nil {
+		transaksiItemResponse.IdTransaksiBlockchain = keyModification.GetTxId()
+	}
+
+	return transaksiItemResponse
 }

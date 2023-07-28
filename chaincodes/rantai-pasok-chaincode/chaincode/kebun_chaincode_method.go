@@ -44,7 +44,7 @@ func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContex
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kebunResponse := helper.ToKebunResponse(ctx, nil, kebun)
+	kebunResponse := helper.ToKebunResponse(ctx, nil, &kebun)
 
 	return helper.ToWebResponse(http.StatusCreated, kebunResponse, nil)
 }
@@ -90,7 +90,7 @@ func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContex
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kebunResponse := helper.ToKebunResponse(ctx, nil, kebun)
+	kebunResponse := helper.ToKebunResponse(ctx, nil, &kebun)
 
 	return helper.ToWebResponse(http.StatusOK, kebunResponse, nil)
 }
@@ -135,7 +135,7 @@ func (c *RantaiPasokChaincodeImpl) KebunFindAll(ctx contractapi.TransactionConte
 			helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
-		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, nil, kebun))
+		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, nil, &kebun))
 	}
 
 	return helper.ToWebResponse(http.StatusOK, kebunResponses, nil)
@@ -161,7 +161,7 @@ func (c *RantaiPasokChaincodeImpl) KebunFindOne(ctx contractapi.TransactionConte
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kebunResponse := helper.ToKebunResponse(nil, nil, kebun)
+	kebunResponse := helper.ToKebunResponse(nil, nil, &kebun)
 
 	return helper.ToWebResponse(http.StatusOK, kebunResponse, nil)
 }
@@ -194,7 +194,7 @@ func (c *RantaiPasokChaincodeImpl) KebunFindOneHistory(ctx contractapi.Transacti
 			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
-		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, response, kebun))
+		kebunResponses = append(kebunResponses, helper.ToKebunResponse(nil, response, &kebun))
 	}
 
 	return helper.ToWebResponse(http.StatusOK, kebunResponses, nil)

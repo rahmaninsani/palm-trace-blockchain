@@ -50,7 +50,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionCont
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kontrakResponse := helper.ToKontrakResponse(ctx, nil, kontrak)
+	kontrakResponse := helper.ToKontrakResponse(ctx, nil, &kontrak)
 
 	return helper.ToWebResponse(http.StatusCreated, kontrakResponse, nil)
 }
@@ -94,7 +94,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionCon
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kontrakResponse := helper.ToKontrakResponse(ctx, nil, kontrak)
+	kontrakResponse := helper.ToKontrakResponse(ctx, nil, &kontrak)
 
 	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
 }
@@ -155,7 +155,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakFindAll(ctx contractapi.TransactionCon
 			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
-		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, nil, kontrak))
+		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, nil, &kontrak))
 	}
 
 	return helper.ToWebResponse(http.StatusOK, kontrakResponses, nil)
@@ -181,7 +181,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakFindOne(ctx contractapi.TransactionCon
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kontrakResponse := helper.ToKontrakResponse(nil, nil, kontrak)
+	kontrakResponse := helper.ToKontrakResponse(nil, nil, &kontrak)
 
 	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
 }
@@ -214,7 +214,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakFindOneHistory(ctx contractapi.Transac
 			return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 		}
 
-		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, response, kontrak))
+		kontrakResponses = append(kontrakResponses, helper.ToKontrakResponse(nil, response, &kontrak))
 	}
 
 	return helper.ToWebResponse(http.StatusOK, kontrakResponses, nil)
