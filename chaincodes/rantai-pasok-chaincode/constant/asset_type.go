@@ -8,6 +8,9 @@ const (
 	AssetTypeDeliveryOrder                  // 2
 	AssetTypeTransaksi                      // 3
 	AssetTypeTransaksiItem                  // 4
+	AssetTypePengiriman                     // 5
+	AssetTypePenerimaan                     // 6
+	AssetTypePembayaran                     // 7
 )
 
 func (assetType AssetType) String() string {
@@ -17,11 +20,17 @@ func (assetType AssetType) String() string {
 	case AssetTypeKontrak:
 		return "Kontrak"
 	case AssetTypeDeliveryOrder:
-		return "DeliveryOrder"
+		return "Delivery Order"
 	case AssetTypeTransaksi:
 		return "Transaksi"
 	case AssetTypeTransaksiItem:
-		return "TransaksiItem"
+		return "Transaksi Item"
+	case AssetTypePengiriman:
+		return "Pengiriman"
+	case AssetTypePenerimaan:
+		return "Penerimaan"
+	case AssetTypePembayaran:
+		return "Pembayaran"
 	default:
 		return "Unknown"
 	}

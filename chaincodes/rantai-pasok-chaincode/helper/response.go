@@ -158,3 +158,73 @@ func ToTransaksiItemResponse(ctx contractapi.TransactionContextInterface, keyMod
 
 	return transaksiItemResponse
 }
+
+func ToPengirimanResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, pengiriman *domain.Pengiriman) *web.PengirimanResponse {
+	pengirimanResponse := &web.PengirimanResponse{
+		Id:                   pengiriman.Id,
+		IdTransaksi:          pengiriman.IdTransaksi,
+		Nomor:                pengiriman.Nomor,
+		Tanggal:              pengiriman.Tanggal,
+		NamaSopir:            pengiriman.NamaSopir,
+		NomorTeleponSopir:    pengiriman.NomorTeleponSopir,
+		NamaKendaraan:        pengiriman.NamaKendaraan,
+		NomorPolisiKendaraan: pengiriman.NomorPolisiKendaraan,
+		CreatedAt:            pengiriman.CreatedAt,
+		UpdatedAt:            pengiriman.UpdatedAt,
+	}
+
+	if ctx != nil {
+		pengirimanResponse.IdTransaksiBlockchain = ctx.GetStub().GetTxID()
+	}
+
+	if keyModification != nil {
+		pengirimanResponse.IdTransaksiBlockchain = keyModification.GetTxId()
+	}
+
+	return pengirimanResponse
+}
+
+func ToPenerimaanResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, penerimaan *domain.Penerimaan) *web.PenerimaanResponse {
+	pengirimanResponse := &web.PenerimaanResponse{
+		Id:          penerimaan.Id,
+		IdTransaksi: penerimaan.IdTransaksi,
+		Nomor:       penerimaan.Nomor,
+		Tanggal:     penerimaan.Tanggal,
+		Kuantitas:   penerimaan.Kuantitas,
+		CreatedAt:   penerimaan.CreatedAt,
+		UpdatedAt:   penerimaan.UpdatedAt,
+	}
+
+	if ctx != nil {
+		pengirimanResponse.IdTransaksiBlockchain = ctx.GetStub().GetTxID()
+	}
+
+	if keyModification != nil {
+		pengirimanResponse.IdTransaksiBlockchain = keyModification.GetTxId()
+	}
+
+	return pengirimanResponse
+}
+
+func ToPembayaranResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, pembayaran *domain.Pembayaran) *web.PembayaranResponse {
+	pembayaranResponse := &web.PembayaranResponse{
+		Id:          pembayaran.Id,
+		IdTransaksi: pembayaran.IdTransaksi,
+		Nomor:       pembayaran.Nomor,
+		Tanggal:     pembayaran.Tanggal,
+		Jumlah:      pembayaran.Jumlah,
+		HashBukti:   pembayaran.HashBukti,
+		CreatedAt:   pembayaran.CreatedAt,
+		UpdatedAt:   pembayaran.UpdatedAt,
+	}
+
+	if ctx != nil {
+		pembayaranResponse.IdTransaksiBlockchain = ctx.GetStub().GetTxID()
+	}
+
+	if keyModification != nil {
+		pembayaranResponse.IdTransaksiBlockchain = keyModification.GetTxId()
+	}
+
+	return pembayaranResponse
+}
