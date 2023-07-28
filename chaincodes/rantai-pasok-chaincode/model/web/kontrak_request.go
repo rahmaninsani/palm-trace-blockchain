@@ -24,6 +24,12 @@ type KontrakConfirmRequest struct {
 	UpdatedAt      string                          `json:"updatedAt"`
 }
 
+type KontrakUpdateKuantitasRequest struct {
+	Id                 string  `json:"id"`
+	KuantitasTerpenuhi float32 `json:"kuantitasTerpenuhi"`
+	UpdatedAt          string  `json:"updatedAt"`
+}
+
 type KontrakFindAllRequest struct {
 	IdPks      string                          `json:"idPks"`
 	IdKoperasi string                          `json:"idKoperasi"`

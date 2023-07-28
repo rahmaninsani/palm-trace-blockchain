@@ -97,6 +97,48 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderConfirm(ctx contractapi.Transact
 	return helper.ToWebResponse(http.StatusOK, deliveryOrderResponse, nil)
 }
 
+func (c *RantaiPasokChaincodeImpl) DeliveryOrderUpdateKuantitas(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user"}); err != nil {
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
+	}
+
+	var deliveryOrderUpdateKuantitasRequest web.DeliveryOrderUpdateKuantitasRequest
+	if err := json.Unmarshal([]byte(payload), &deliveryOrderUpdateKuantitasRequest); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	deliveryOrderPrevBytes, err := ctx.GetStub().GetState(deliveryOrderUpdateKuantitasRequest.Id)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	if deliveryOrderPrevBytes == nil {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
+
+	var deliveryOrder domain.DeliveryOrder
+	if err = json.Unmarshal(deliveryOrderPrevBytes, &deliveryOrder); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	deliveryOrder.KuantitasTepenuhi = deliveryOrder.KuantitasTepenuhi + deliveryOrderUpdateKuantitasRequest.KuantitasTerpenuhi
+	deliveryOrder.KuantitasTersisa = deliveryOrder.KuantitasTersisa - deliveryOrderUpdateKuantitasRequest.KuantitasTerpenuhi
+	deliveryOrder.UpdatedAt = deliveryOrderUpdateKuantitasRequest.UpdatedAt
+
+	deliveryOrderJSON, err := json.Marshal(deliveryOrder)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	if err = ctx.GetStub().PutState(deliveryOrder.Id, deliveryOrderJSON); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	kontrakResponse := helper.ToDeliveryOrderResponse(ctx, nil, &deliveryOrder)
+
+	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
+}
+
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderFindAll(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)

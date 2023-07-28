@@ -112,6 +112,47 @@ func (c *RantaiPasokChaincodeImpl) TransaksiConfirm(ctx contractapi.TransactionC
 	return helper.ToWebResponse(http.StatusOK, transaksiResponse, nil)
 }
 
+func (c *RantaiPasokChaincodeImpl) TransaksiUpdateStatus(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
+	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user", "pabrikkelapasawit.user"}); err != nil {
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
+	}
+
+	var transaksiUpdateStatusRequest web.TransaksiUpdateStatusRequest
+	if err := json.Unmarshal([]byte(payload), &transaksiUpdateStatusRequest); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	transaksiPrevBytes, err := ctx.GetStub().GetState(transaksiUpdateStatusRequest.Id)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	if transaksiPrevBytes == nil {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
+
+	var transaksi domain.Transaksi
+	if err = json.Unmarshal(transaksiPrevBytes, &transaksi); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	transaksi.Status = transaksiUpdateStatusRequest.Status
+	transaksi.UpdatedAt = transaksiUpdateStatusRequest.UpdatedAt
+
+	transaksiJSON, err := json.Marshal(transaksi)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	if err = ctx.GetStub().PutState(transaksi.Id, transaksiJSON); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	kontrakResponse := helper.ToTransaksiResponse(ctx, nil, &transaksi)
+
+	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
+}
+
 func (c *RantaiPasokChaincodeImpl) TransaksiFindAll(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)

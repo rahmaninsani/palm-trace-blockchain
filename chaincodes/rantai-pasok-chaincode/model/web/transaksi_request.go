@@ -12,6 +12,12 @@ type TransaksiCreateRequest struct {
 	UpdatedAt        string `json:"updatedAt"`
 }
 
+type TransaksiUpdateStatusRequest struct {
+	Id        string                   `json:"id"`
+	Status    constant.StatusTransaksi `json:"status"`
+	UpdatedAt string                   `json:"updatedAt"`
+}
+
 type TransaksiConfirmRequest struct {
 	Id                     string                            `json:"id"`
 	StatusKoperasi         constant.StatusPenawaranTransaksi `json:"statusKoperasi"`

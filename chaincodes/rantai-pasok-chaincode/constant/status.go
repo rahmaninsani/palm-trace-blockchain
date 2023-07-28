@@ -90,14 +90,14 @@ const (
 	TransaksiMenungguKonfirmasiPks                             // 3
 	TransaksiDisetujuiPks                                      // 4
 	TransaksiDitolakPks                                        // 5
-	TransaksiMenungguDikirimPetani
-	TransaksiDikirimPetani    // 6
-	TransaksiDiterimaKoperasi // 7
-	TransaksiDikirimKoperasi  // 8
-	TransaksiDiterimaPks      // 9
-	TransaksiDibayarPks       // 10
-	TransaksiDibayarKoperasi  // 11
-	TransaksiSelesai          // 12
+	TransaksiMenungguDikirimPetani                             // 6
+	TransaksiDikirimPetani                                     // 7
+	TransaksiDiterimaKoperasi                                  // 8
+	TransaksiDikirimKoperasi                                   // 9
+	TransaksiDiterimaPks                                       // 10
+	TransaksiDibayarPks                                        // 11
+	TransaksiDibayarKoperasi                                   // 12
+	TransaksiSelesai                                           // 13
 )
 
 func (status StatusTransaksi) String() string {

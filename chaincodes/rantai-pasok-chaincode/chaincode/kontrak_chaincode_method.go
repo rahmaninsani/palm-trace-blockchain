@@ -99,6 +99,48 @@ func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionCon
 	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
 }
 
+func (c *RantaiPasokChaincodeImpl) KontrakUpdateKuantitas(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user"}); err != nil {
+		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
+	}
+
+	var kontrakUpdateKuantitasRequest web.KontrakUpdateKuantitasRequest
+	if err := json.Unmarshal([]byte(payload), &kontrakUpdateKuantitasRequest); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	kontrakPrevBytes, err := ctx.GetStub().GetState(kontrakUpdateKuantitasRequest.Id)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	if kontrakPrevBytes == nil {
+		return helper.ToWebResponse(http.StatusNotFound, nil, nil)
+	}
+
+	var kontrak domain.Kontrak
+	if err = json.Unmarshal(kontrakPrevBytes, &kontrak); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	kontrak.KuantitasTepenuhi = kontrak.KuantitasTepenuhi + kontrakUpdateKuantitasRequest.KuantitasTerpenuhi
+	kontrak.KuantitasTersisa = kontrak.KuantitasTersisa - kontrakUpdateKuantitasRequest.KuantitasTerpenuhi
+	kontrak.UpdatedAt = kontrakUpdateKuantitasRequest.UpdatedAt
+
+	kontrakJSON, err := json.Marshal(kontrak)
+	if err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	if err = ctx.GetStub().PutState(kontrak.Id, kontrakJSON); err != nil {
+		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
+	}
+
+	kontrakResponse := helper.ToKontrakResponse(ctx, nil, &kontrak)
+
+	return helper.ToWebResponse(http.StatusOK, kontrakResponse, nil)
+}
+
 func (c *RantaiPasokChaincodeImpl) KontrakFindAll(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
 	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user", "petani.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)

@@ -23,6 +23,12 @@ type DeliveryOrderConfirmRequest struct {
 	UpdatedAt      string                                `json:"updatedAt"`
 }
 
+type DeliveryOrderUpdateKuantitasRequest struct {
+	Id                 string  `json:"id"`
+	KuantitasTerpenuhi float32 `json:"kuantitasTerpenuhi"`
+	UpdatedAt          string  `json:"updatedAt"`
+}
+
 type DeliveryOrderFindAllRequest struct {
 	IdKontrak string                                `json:"idKontrak"`
 	Status    constant.StatusPenawaranDeliveryOrder `json:"status"`
