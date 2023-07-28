@@ -82,19 +82,21 @@ func ToKontrakResponse(ctx contractapi.TransactionContextInterface, keyModificat
 
 func ToDeliveryOrderResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, deliveryOrder *domain.DeliveryOrder) *web.DeliveryOrderResponse {
 	deliveryOrderResponse := &web.DeliveryOrderResponse{
-		Id:               deliveryOrder.Id,
-		IdKontrak:        deliveryOrder.IdKontrak,
-		Nomor:            deliveryOrder.Nomor,
-		TanggalPembuatan: deliveryOrder.TanggalPembuatan,
-		Periode:          deliveryOrder.Periode,
-		Kuantitas:        deliveryOrder.Kuantitas,
-		Harga:            deliveryOrder.Harga,
-		Rendemen:         deliveryOrder.Rendemen,
-		Status:           deliveryOrder.Status.String(),
-		Pesan:            deliveryOrder.Pesan,
-		TanggalRespons:   deliveryOrder.TanggalRespons,
-		CreatedAt:        deliveryOrder.CreatedAt,
-		UpdatedAt:        deliveryOrder.UpdatedAt,
+		Id:                deliveryOrder.Id,
+		IdKontrak:         deliveryOrder.IdKontrak,
+		Nomor:             deliveryOrder.Nomor,
+		TanggalPembuatan:  deliveryOrder.TanggalPembuatan,
+		Periode:           deliveryOrder.Periode,
+		Kuantitas:         deliveryOrder.Kuantitas,
+		Harga:             deliveryOrder.Harga,
+		Rendemen:          deliveryOrder.Rendemen,
+		Status:            deliveryOrder.Status.String(),
+		Pesan:             deliveryOrder.Pesan,
+		TanggalRespons:    deliveryOrder.TanggalRespons,
+		KuantitasTepenuhi: deliveryOrder.KuantitasTepenuhi,
+		KuantitasTersisa:  deliveryOrder.KuantitasTersisa,
+		CreatedAt:         deliveryOrder.CreatedAt,
+		UpdatedAt:         deliveryOrder.UpdatedAt,
 	}
 
 	if ctx != nil {

@@ -22,20 +22,22 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderCreate(ctx contractapi.Transacti
 	}
 
 	deliveryOrder := domain.DeliveryOrder{
-		Id:               deliveryOrderCreateRequest.Id,
-		AssetType:        constant.AssetTypeDeliveryOrder,
-		IdKontrak:        deliveryOrderCreateRequest.IdKontrak,
-		Nomor:            deliveryOrderCreateRequest.Nomor,
-		TanggalPembuatan: deliveryOrderCreateRequest.TanggalPembuatan,
-		Periode:          deliveryOrderCreateRequest.Periode,
-		Kuantitas:        deliveryOrderCreateRequest.Kuantitas,
-		Harga:            deliveryOrderCreateRequest.Harga,
-		Rendemen:         deliveryOrderCreateRequest.Rendemen,
-		Status:           constant.PenawaranDeliveryOrderMenungguKonfirmasi,
-		Pesan:            "",
-		TanggalRespons:   "",
-		CreatedAt:        deliveryOrderCreateRequest.CreatedAt,
-		UpdatedAt:        deliveryOrderCreateRequest.UpdatedAt,
+		Id:                deliveryOrderCreateRequest.Id,
+		AssetType:         constant.AssetTypeDeliveryOrder,
+		IdKontrak:         deliveryOrderCreateRequest.IdKontrak,
+		Nomor:             deliveryOrderCreateRequest.Nomor,
+		TanggalPembuatan:  deliveryOrderCreateRequest.TanggalPembuatan,
+		Periode:           deliveryOrderCreateRequest.Periode,
+		Kuantitas:         deliveryOrderCreateRequest.Kuantitas,
+		Harga:             deliveryOrderCreateRequest.Harga,
+		Rendemen:          deliveryOrderCreateRequest.Rendemen,
+		Status:            constant.PenawaranDeliveryOrderMenungguKonfirmasi,
+		Pesan:             "",
+		TanggalRespons:    "",
+		KuantitasTepenuhi: 0,
+		KuantitasTersisa:  deliveryOrderCreateRequest.Kuantitas,
+		CreatedAt:         deliveryOrderCreateRequest.CreatedAt,
+		UpdatedAt:         deliveryOrderCreateRequest.UpdatedAt,
 	}
 
 	deliveryOrderJSON, err := json.Marshal(deliveryOrder)
