@@ -12,7 +12,7 @@ import (
 )
 
 func (c *RantaiPasokChaincodeImpl) PenerimaanCreate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
-	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
+	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user", "pabrikkelapasawit.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 

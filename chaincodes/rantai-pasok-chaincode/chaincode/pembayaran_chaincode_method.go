@@ -12,7 +12,7 @@ import (
 )
 
 func (c *RantaiPasokChaincodeImpl) PembayaranCreate(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
-	if err := helper.CheckAffiliation(ctx, []string{"petani.user"}); err != nil {
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
@@ -23,7 +23,7 @@ func (c *RantaiPasokChaincodeImpl) PembayaranCreate(ctx contractapi.TransactionC
 
 	pembayaran := domain.Pembayaran{
 		Id:          pembayaranCreateRequest.Id,
-		AssetType:   constant.AssetTypePenerimaan,
+		AssetType:   constant.AssetTypePembayaran,
 		IdTransaksi: pembayaranCreateRequest.IdTransaksi,
 		Nomor:       pembayaranCreateRequest.Nomor,
 		Tanggal:     pembayaranCreateRequest.Tanggal,

@@ -98,7 +98,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderConfirm(ctx contractapi.Transact
 }
 
 func (c *RantaiPasokChaincodeImpl) DeliveryOrderUpdateKuantitas(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
-	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user", "koperasi.user"}); err != nil {
+	if err := helper.CheckAffiliation(ctx, []string{"pabrikkelapasawit.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 

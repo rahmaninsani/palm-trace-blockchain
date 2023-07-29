@@ -113,7 +113,7 @@ func (c *RantaiPasokChaincodeImpl) TransaksiConfirm(ctx contractapi.TransactionC
 }
 
 func (c *RantaiPasokChaincodeImpl) TransaksiUpdateStatus(ctx contractapi.TransactionContextInterface, payload string) *web.WebResponse {
-	if err := helper.CheckAffiliation(ctx, []string{"koperasi.user", "pabrikkelapasawit.user"}); err != nil {
+	if err := helper.CheckAffiliation(ctx, []string{"petani.user", "koperasi.user", "pabrikkelapasawit.user"}); err != nil {
 		return helper.ToWebResponse(http.StatusUnauthorized, nil, err)
 	}
 
