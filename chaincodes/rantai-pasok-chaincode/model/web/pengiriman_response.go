@@ -4,6 +4,7 @@ type PengirimanResponse struct {
 	IdTransaksiBlockchain string `json:"idTransaksiBlockchain,omitempty" metadata:",optional"`
 	Id                    string `json:"id"`
 	IdTransaksi           string `json:"idTransaksi"`
+	JenisUser             string `json:"jenisUser"`
 	Nomor                 string `json:"nomor"`
 	Tanggal               string `json:"tanggal"`
 	NamaSopir             string `json:"namaSopir"`

@@ -165,6 +165,7 @@ func ToPengirimanResponse(ctx contractapi.TransactionContextInterface, keyModifi
 	pengirimanResponse := &web.PengirimanResponse{
 		Id:                   pengiriman.Id,
 		IdTransaksi:          pengiriman.IdTransaksi,
+		JenisUser:            pengiriman.JenisUser,
 		Nomor:                pengiriman.Nomor,
 		Tanggal:              pengiriman.Tanggal,
 		NamaSopir:            pengiriman.NamaSopir,
@@ -190,6 +191,7 @@ func ToPenerimaanResponse(ctx contractapi.TransactionContextInterface, keyModifi
 	pengirimanResponse := &web.PenerimaanResponse{
 		Id:          penerimaan.Id,
 		IdTransaksi: penerimaan.IdTransaksi,
+		JenisUser:   penerimaan.JenisUser,
 		Nomor:       penerimaan.Nomor,
 		Tanggal:     penerimaan.Tanggal,
 		Kuantitas:   penerimaan.Kuantitas,
@@ -212,9 +214,10 @@ func ToPembayaranResponse(ctx contractapi.TransactionContextInterface, keyModifi
 	pembayaranResponse := &web.PembayaranResponse{
 		Id:          pembayaran.Id,
 		IdTransaksi: pembayaran.IdTransaksi,
+		JenisUser:   pembayaran.JenisUser,
 		Nomor:       pembayaran.Nomor,
 		Tanggal:     pembayaran.Tanggal,
-		Jumlah:      pembayaran.Jumlah,
+		JumlahBayar: pembayaran.JumlahBayar,
 		HashBukti:   pembayaran.HashBukti,
 		CreatedAt:   pembayaran.CreatedAt,
 		UpdatedAt:   pembayaran.UpdatedAt,

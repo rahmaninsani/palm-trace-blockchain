@@ -25,6 +25,7 @@ func (c *RantaiPasokChaincodeImpl) PenerimaanCreate(ctx contractapi.TransactionC
 		Id:          penerimaanCreateRequest.Id,
 		AssetType:   constant.AssetTypePenerimaan,
 		IdTransaksi: penerimaanCreateRequest.IdTransaksi,
+		JenisUser:   penerimaanCreateRequest.JenisUser,
 		Nomor:       penerimaanCreateRequest.Nomor,
 		Tanggal:     penerimaanCreateRequest.Tanggal,
 		Kuantitas:   penerimaanCreateRequest.Kuantitas,
