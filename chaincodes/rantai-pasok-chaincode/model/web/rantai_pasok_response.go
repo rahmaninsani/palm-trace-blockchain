@@ -19,6 +19,6 @@ type RantaiPasokResponse struct {
 	Pesan                 string                 `json:"pesan"`
 	TanggalRespons        string                 `json:"tanggalRespons"`
 	DeliveryOrders        []domain.DeliveryOrder `json:"deliveryOrders"`
-	KuantitasTepenuhi     float32                `json:"kuantitasTepenuhi"`
+	KuantitasTerpenuhi    float32                `json:"kuantitasTerpenuhi"`
 	KuantitasTersisa      float32                `json:"kuantitasTersisa"`
 }

@@ -22,23 +22,23 @@ func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionCont
 	}
 
 	kontrak := domain.Kontrak{
-		Id:                kontrakCreateRequest.Id,
-		AssetType:         constant.AssetTypeKontrak,
-		IdPks:             kontrakCreateRequest.IdPks,
-		IdKoperasi:        kontrakCreateRequest.IdKoperasi,
-		Nomor:             kontrakCreateRequest.Nomor,
-		TanggalPembuatan:  kontrakCreateRequest.TanggalPembuatan,
-		TangalMulai:       kontrakCreateRequest.TangalMulai,
-		TanggalSelesai:    kontrakCreateRequest.TanggalSelesai,
-		Kuantitas:         kontrakCreateRequest.Kuantitas,
-		Harga:             kontrakCreateRequest.Harga,
-		Status:            constant.PenawaranKontrakMenungguKonfirmasi,
-		Pesan:             "",
-		TanggalRespons:    "",
-		KuantitasTepenuhi: 0,
-		KuantitasTersisa:  0,
-		CreatedAt:         kontrakCreateRequest.CreatedAt,
-		UpdatedAt:         kontrakCreateRequest.UpdatedAt,
+		Id:                 kontrakCreateRequest.Id,
+		AssetType:          constant.AssetTypeKontrak,
+		IdPks:              kontrakCreateRequest.IdPks,
+		IdKoperasi:         kontrakCreateRequest.IdKoperasi,
+		Nomor:              kontrakCreateRequest.Nomor,
+		TanggalPembuatan:   kontrakCreateRequest.TanggalPembuatan,
+		TangalMulai:        kontrakCreateRequest.TangalMulai,
+		TanggalSelesai:     kontrakCreateRequest.TanggalSelesai,
+		Kuantitas:          kontrakCreateRequest.Kuantitas,
+		Harga:              kontrakCreateRequest.Harga,
+		Status:             constant.PenawaranKontrakMenungguKonfirmasi,
+		Pesan:              "",
+		TanggalRespons:     "",
+		KuantitasTerpenuhi: 0,
+		KuantitasTersisa:   0,
+		CreatedAt:          kontrakCreateRequest.CreatedAt,
+		UpdatedAt:          kontrakCreateRequest.UpdatedAt,
 	}
 
 	kontrakJSON, err := json.Marshal(kontrak)
@@ -123,7 +123,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakUpdateKuantitas(ctx contractapi.Transa
 		return helper.ToWebResponse(http.StatusInternalServerError, nil, err)
 	}
 
-	kontrak.KuantitasTepenuhi = kontrak.KuantitasTepenuhi + kontrakUpdateKuantitasRequest.KuantitasTerpenuhi
+	kontrak.KuantitasTerpenuhi = kontrak.KuantitasTerpenuhi + kontrakUpdateKuantitasRequest.KuantitasTerpenuhi
 	kontrak.KuantitasTersisa = kontrak.KuantitasTersisa - kontrakUpdateKuantitasRequest.KuantitasTerpenuhi
 	kontrak.UpdatedAt = kontrakUpdateKuantitasRequest.UpdatedAt
 
