@@ -17,11 +17,11 @@ type KontrakCreateRequest struct {
 }
 
 type KontrakConfirmRequest struct {
-	Id             string                          `json:"id"`
-	Status         constant.StatusPenawaranKontrak `json:"status"`
-	Pesan          string                          `json:"pesan"`
-	TanggalRespons string                          `json:"tanggalRespons"`
-	UpdatedAt      string                          `json:"updatedAt"`
+	Id                string                          `json:"id"`
+	Status            constant.StatusPenawaranKontrak `json:"status"`
+	Pesan             string                          `json:"pesan"`
+	TanggalKonfirmasi string                          `json:"tanggalKonfirmasi"`
+	UpdatedAt         string                          `json:"updatedAt"`
 }
 
 type KontrakUpdateKuantitasRequest struct {

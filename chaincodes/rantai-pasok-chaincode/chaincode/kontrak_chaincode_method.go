@@ -34,7 +34,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakCreate(ctx contractapi.TransactionCont
 		Harga:              kontrakCreateRequest.Harga,
 		Status:             constant.PenawaranKontrakMenungguKonfirmasi,
 		Pesan:              "",
-		TanggalRespons:     "",
+		TanggalKonfirmasi:  "",
 		KuantitasTerpenuhi: 0,
 		KuantitasTersisa:   0,
 		CreatedAt:          kontrakCreateRequest.CreatedAt,
@@ -81,7 +81,7 @@ func (c *RantaiPasokChaincodeImpl) KontrakConfirm(ctx contractapi.TransactionCon
 
 	kontrak.Status = kontrakConfirmRequest.Status
 	kontrak.Pesan = kontrakConfirmRequest.Pesan
-	kontrak.TanggalRespons = kontrakConfirmRequest.TanggalRespons
+	kontrak.TanggalKonfirmasi = kontrakConfirmRequest.TanggalKonfirmasi
 	kontrak.KuantitasTersisa = kontrak.Kuantitas
 	kontrak.UpdatedAt = kontrakConfirmRequest.UpdatedAt
 

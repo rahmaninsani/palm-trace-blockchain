@@ -22,21 +22,21 @@ func (c *RantaiPasokChaincodeImpl) TransaksiCreate(ctx contractapi.TransactionCo
 	}
 
 	transaksi := domain.Transaksi{
-		Id:                     transaksiCreateRequest.Id,
-		AssetType:              constant.AssetTypeTransaksi,
-		IdDeliveryOrder:        transaksiCreateRequest.IdDeliveryOrder,
-		IdPetani:               transaksiCreateRequest.IdPetani,
-		Nomor:                  transaksiCreateRequest.Nomor,
-		TanggalPembuatan:       transaksiCreateRequest.TanggalPembuatan,
-		StatusKoperasi:         constant.PenawaranTransaksiMenungguKonfirmasi,
-		PesanKoperasi:          "",
-		TanggalResponsKoperasi: "",
-		StatusPks:              constant.PenawaranTransaksiMenungguKonfirmasi,
-		PesanPks:               "",
-		TanggalResponsPks:      "",
-		Status:                 constant.TransaksiMenungguKonfirmasiKoperasi,
-		CreatedAt:              transaksiCreateRequest.CreatedAt,
-		UpdatedAt:              transaksiCreateRequest.UpdatedAt,
+		Id:                        transaksiCreateRequest.Id,
+		AssetType:                 constant.AssetTypeTransaksi,
+		IdDeliveryOrder:           transaksiCreateRequest.IdDeliveryOrder,
+		IdPetani:                  transaksiCreateRequest.IdPetani,
+		Nomor:                     transaksiCreateRequest.Nomor,
+		TanggalPembuatan:          transaksiCreateRequest.TanggalPembuatan,
+		StatusKoperasi:            constant.PenawaranTransaksiMenungguKonfirmasi,
+		PesanKoperasi:             "",
+		TanggalKonfirmasiKoperasi: "",
+		StatusPks:                 constant.PenawaranTransaksiMenungguKonfirmasi,
+		PesanPks:                  "",
+		TanggalKonfirmasiPks:      "",
+		Status:                    constant.TransaksiMenungguKonfirmasiKoperasi,
+		CreatedAt:                 transaksiCreateRequest.CreatedAt,
+		UpdatedAt:                 transaksiCreateRequest.UpdatedAt,
 	}
 
 	transaksiJSON, err := json.Marshal(transaksi)
@@ -80,7 +80,7 @@ func (c *RantaiPasokChaincodeImpl) TransaksiConfirm(ctx contractapi.TransactionC
 	if transaksiConfirmRequest.StatusKoperasi != -1 {
 		transaksi.StatusKoperasi = transaksiConfirmRequest.StatusKoperasi
 		transaksi.PesanKoperasi = transaksiConfirmRequest.PesanKoperasi
-		transaksi.TanggalResponsKoperasi = transaksiConfirmRequest.TanggalResponsKoperasi
+		transaksi.TanggalKonfirmasiKoperasi = transaksiConfirmRequest.TanggalKonfirmasiKoperasi
 		if transaksiConfirmRequest.StatusKoperasi == constant.PenawaranTransaksiDisetujui {
 			transaksi.Status = constant.TransaksiMenungguKonfirmasiPks
 		} else {
@@ -91,7 +91,7 @@ func (c *RantaiPasokChaincodeImpl) TransaksiConfirm(ctx contractapi.TransactionC
 	if transaksiConfirmRequest.StatusPks != -1 {
 		transaksi.StatusPks = transaksiConfirmRequest.StatusPks
 		transaksi.PesanPks = transaksiConfirmRequest.PesanPks
-		transaksi.TanggalResponsPks = transaksiConfirmRequest.TanggalResponsPks
+		transaksi.TanggalKonfirmasiPks = transaksiConfirmRequest.TanggalKonfirmasiPks
 		if transaksiConfirmRequest.StatusPks == constant.PenawaranTransaksiDisetujui {
 			transaksi.Status = constant.TransaksiMenungguDikirimPetani
 		} else {

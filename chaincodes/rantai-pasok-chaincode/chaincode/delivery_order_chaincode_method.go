@@ -33,7 +33,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderCreate(ctx contractapi.Transacti
 		Rendemen:           deliveryOrderCreateRequest.Rendemen,
 		Status:             constant.PenawaranDeliveryOrderMenungguKonfirmasi,
 		Pesan:              "",
-		TanggalRespons:     "",
+		TanggalKonfirmasi:  "",
 		KuantitasTerpenuhi: 0,
 		KuantitasTersisa:   deliveryOrderCreateRequest.Kuantitas,
 		CreatedAt:          deliveryOrderCreateRequest.CreatedAt,
@@ -80,7 +80,7 @@ func (c *RantaiPasokChaincodeImpl) DeliveryOrderConfirm(ctx contractapi.Transact
 
 	deliveryOrder.Status = deliveryOrderConfirmRequest.Status
 	deliveryOrder.Pesan = deliveryOrderConfirmRequest.Pesan
-	deliveryOrder.TanggalRespons = deliveryOrderConfirmRequest.TanggalRespons
+	deliveryOrder.TanggalKonfirmasi = deliveryOrderConfirmRequest.TanggalKonfirmasi
 	deliveryOrder.UpdatedAt = deliveryOrderConfirmRequest.UpdatedAt
 
 	deliveryOrderJSON, err := json.Marshal(deliveryOrder)

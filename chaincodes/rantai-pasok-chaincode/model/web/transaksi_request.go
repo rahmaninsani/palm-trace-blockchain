@@ -19,14 +19,14 @@ type TransaksiUpdateStatusRequest struct {
 }
 
 type TransaksiConfirmRequest struct {
-	Id                     string                            `json:"id"`
-	StatusKoperasi         constant.StatusPenawaranTransaksi `json:"statusKoperasi"`
-	PesanKoperasi          string                            `json:"pesanKoperasi"`
-	TanggalResponsKoperasi string                            `json:"tanggalResponsKoperasi"`
-	StatusPks              constant.StatusPenawaranTransaksi `json:"statusPks"`
-	PesanPks               string                            `json:"pesanPks"`
-	TanggalResponsPks      string                            `json:"tanggalResponsPks"`
-	UpdatedAt              string                            `json:"updatedAt"`
+	Id                        string                            `json:"id"`
+	StatusKoperasi            constant.StatusPenawaranTransaksi `json:"statusKoperasi"`
+	PesanKoperasi             string                            `json:"pesanKoperasi"`
+	TanggalKonfirmasiKoperasi string                            `json:"tanggalKonfirmasiKoperasi"`
+	StatusPks                 constant.StatusPenawaranTransaksi `json:"statusPks"`
+	PesanPks                  string                            `json:"pesanPks"`
+	TanggalKonfirmasiPks      string                            `json:"tanggalKonfirmasiPks"`
+	UpdatedAt                 string                            `json:"updatedAt"`
 }
 
 type TransaksiFindAllRequest struct {

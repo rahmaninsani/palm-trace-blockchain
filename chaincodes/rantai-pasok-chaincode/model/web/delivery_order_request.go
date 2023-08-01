@@ -16,11 +16,11 @@ type DeliveryOrderCreateRequest struct {
 }
 
 type DeliveryOrderConfirmRequest struct {
-	Id             string                                `json:"id"`
-	Status         constant.StatusPenawaranDeliveryOrder `json:"status"`
-	Pesan          string                                `json:"pesan"`
-	TanggalRespons string                                `json:"tanggalRespons"`
-	UpdatedAt      string                                `json:"updatedAt"`
+	Id                string                                `json:"id"`
+	Status            constant.StatusPenawaranDeliveryOrder `json:"status"`
+	Pesan             string                                `json:"pesan"`
+	TanggalKonfirmasi string                                `json:"tanggalKonfirmasi"`
+	UpdatedAt         string                                `json:"updatedAt"`
 }
 
 type DeliveryOrderUpdateKuantitasRequest struct {

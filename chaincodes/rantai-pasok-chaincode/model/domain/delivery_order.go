@@ -14,7 +14,7 @@ type DeliveryOrder struct {
 	Rendemen           float32                               `json:"rendemen"`
 	Status             constant.StatusPenawaranDeliveryOrder `json:"status"`
 	Pesan              string                                `json:"pesan"`
-	TanggalRespons     string                                `json:"tanggalRespons"`
+	TanggalKonfirmasi  string                                `json:"tanggalKonfirmasi"`
 	KuantitasTerpenuhi float32                               `json:"kuantitasTerpenuhi"`
 	KuantitasTersisa   float32                               `json:"kuantitasTersisa"`
 	CreatedAt          string                                `json:"createdAt"`
