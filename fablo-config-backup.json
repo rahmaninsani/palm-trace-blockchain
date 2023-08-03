@@ -11,12 +11,12 @@
   "orgs": [
     {
       "organization": {
-        "name": "PalmSafeOrderer",
-        "domain": "orderer.palmsafe.com"
+        "name": "PalmTraceOrderer",
+        "domain": "orderer.palmtrace.co.id"
       },
       "orderers": [
         {
-          "groupName": "palmsafe-orderer-group",
+          "groupName": "palmtrace-orderer-group",
           "type": "solo",
           "instances": 1
         }
@@ -25,7 +25,7 @@
     {
       "organization": {
         "name": "Petani",
-        "domain": "petani.palmsafe.com"
+        "domain": "petani.palmtrace.co.id"
       },
       "peer": {
         "instances": 1,
@@ -35,7 +35,7 @@
     {
       "organization": {
         "name": "Koperasi",
-        "domain": "koperasi.palmsafe.com"
+        "domain": "koperasi.palmtrace.co.id"
       },
       "peer": {
         "instances": 1,
@@ -45,7 +45,7 @@
     {
       "organization": {
         "name": "PabrikKelapaSawit",
-        "domain": "pabrikkelapasawit.palmsafe.com"
+        "domain": "pabrikkelapasawit.palmtrace.co.id"
       },
       "peer": {
         "instances": 1,
@@ -55,7 +55,7 @@
     {
       "organization": {
         "name": "Dinas",
-        "domain": "dinas.palmsafe.com"
+        "domain": "dinas.palmtrace.co.id"
       },
       "peer": {
         "instances": 1,

@@ -1,7 +1,7 @@
 {
-  "name": "palm-safe-blockchain",
+  "name": "palm-trace-blockchain",
   "version": "1.0.0",
-  "description": "Palm Safe Blockchain",
+  "description": "Palm Trace Blockchain",
   "type": "module",
   "main": "generate-fabric-config-file.js",
   "scripts": {
