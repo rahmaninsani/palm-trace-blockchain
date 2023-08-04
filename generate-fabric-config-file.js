@@ -79,7 +79,7 @@ const main = async () => {
       connectionProfileObj.client.connection = {
         timeout: {
           peer: {
-            endorser: "300",
+            endorser: "500",
           },
         },
       };
