@@ -29,6 +29,7 @@ func (c *RantaiPasokChaincodeImpl) TransaksiItemCreate(ctx contractapi.Transacti
 		// TODO IdTransaksiBlockchainKebun: "",
 		Kuantitas: transaksiItemCreateRequest.Kuantitas,
 		Harga:     transaksiItemCreateRequest.Harga,
+		UmurTanam: transaksiItemCreateRequest.UmurTanam,
 		CreatedAt: transaksiItemCreateRequest.CreatedAt,
 		UpdatedAt: transaksiItemCreateRequest.UpdatedAt,
 	}

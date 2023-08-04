@@ -8,6 +8,7 @@ type TransaksiItemResponse struct {
 	// TODO IdTransaksiBlockchainKebun string  `json:"idTransaksiBlockchainKebun"`
 	Kuantitas float32 `json:"kuantitas"`
 	Harga     float64 `json:"harga"`
+	UmurTanam int     `json:"umurTanam"`
 	CreatedAt string  `json:"createdAt"`
 	UpdatedAt string  `json:"updatedAt"`
 }

@@ -146,6 +146,7 @@ func ToTransaksiItemResponse(ctx contractapi.TransactionContextInterface, keyMod
 		IdKebun:     transaksiItem.IdKebun,
 		Kuantitas:   transaksiItem.Kuantitas,
 		Harga:       transaksiItem.Harga,
+		UmurTanam:   transaksiItem.UmurTanam,
 		CreatedAt:   transaksiItem.CreatedAt,
 		UpdatedAt:   transaksiItem.UpdatedAt,
 	}
