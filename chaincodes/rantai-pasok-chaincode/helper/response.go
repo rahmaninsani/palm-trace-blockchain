@@ -26,16 +26,29 @@ func ToWebResponse(status int, data interface{}, err error) *web.WebResponse {
 
 func ToKebunResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, kebun *domain.Kebun) *web.KebunResponse {
 	kebunResponse := &web.KebunResponse{
-		Id:             kebun.Id,
-		IdPetani:       kebun.IdPetani,
-		Alamat:         kebun.Alamat,
-		Latitude:       kebun.Latitude,
-		Longitude:      kebun.Longitude,
-		Luas:           kebun.Luas,
-		NomorRspo:      kebun.NomorRspo,
-		SertifikatRspo: kebun.SertifikatRspo,
-		CreatedAt:      kebun.CreatedAt,
-		UpdatedAt:      kebun.UpdatedAt,
+		Id:                            kebun.Id,
+		IdPetani:                      kebun.IdPetani,
+		Alamat:                        kebun.Alamat,
+		Latitude:                      kebun.Latitude,
+		Longitude:                     kebun.Longitude,
+		Luas:                          kebun.Luas,
+		KemampuanProduksiHarian:       kebun.KemampuanProduksiHarian,
+		NomorSuratKeteranganLurah:     kebun.NomorSuratKeteranganLurah,
+		CidSuratKeteranganLurah:       kebun.CidSuratKeteranganLurah,
+		NomorSuratKeteranganGantiRugi: kebun.NomorSuratKeteranganGantiRugi,
+		CidSuratKeteranganGantiRugi:   kebun.CidSuratKeteranganGantiRugi,
+		NomorSertifikatHakMilik:       kebun.NomorSertifikatHakMilik,
+		CidSertifikatHakMilik:         kebun.CidSertifikatHakMilik,
+		NomorSuratTandaBudidaya:       kebun.NomorSuratTandaBudidaya,
+		CidSuratTandaBudidaya:         kebun.CidSuratTandaBudidaya,
+		NomorSertifikatRspo:           kebun.NomorSertifikatRspo,
+		CidSertifikatRspo:             kebun.CidSertifikatRspo,
+		NomorSertifikatIspo:           kebun.NomorSertifikatIspo,
+		CidSertifikatIspo:             kebun.CidSertifikatIspo,
+		NomorSertifikatIscc:           kebun.NomorSertifikatIscc,
+		CidSertifikatIscc:             kebun.CidSertifikatIscc,
+		CreatedAt:                     kebun.CreatedAt,
+		UpdatedAt:                     kebun.UpdatedAt,
 	}
 
 	if ctx != nil {
@@ -213,15 +226,16 @@ func ToPenerimaanResponse(ctx contractapi.TransactionContextInterface, keyModifi
 
 func ToPembayaranResponse(ctx contractapi.TransactionContextInterface, keyModification *queryresult.KeyModification, pembayaran *domain.Pembayaran) *web.PembayaranResponse {
 	pembayaranResponse := &web.PembayaranResponse{
-		Id:          pembayaran.Id,
-		IdTransaksi: pembayaran.IdTransaksi,
-		JenisUser:   pembayaran.JenisUser,
-		Nomor:       pembayaran.Nomor,
-		Tanggal:     pembayaran.Tanggal,
-		JumlahBayar: pembayaran.JumlahBayar,
-		HashBukti:   pembayaran.HashBukti,
-		CreatedAt:   pembayaran.CreatedAt,
-		UpdatedAt:   pembayaran.UpdatedAt,
+		Id:                    pembayaran.Id,
+		IdTransaksi:           pembayaran.IdTransaksi,
+		JenisUser:             pembayaran.JenisUser,
+		Nomor:                 pembayaran.Nomor,
+		Tanggal:               pembayaran.Tanggal,
+		NomorRekeningPengirim: pembayaran.NomorRekeningPengirim,
+		NomorRekeningPenerima: pembayaran.NomorRekeningPenerima,
+		CidBuktiPembayaran:    pembayaran.CidBuktiPembayaran,
+		CreatedAt:             pembayaran.CreatedAt,
+		UpdatedAt:             pembayaran.UpdatedAt,
 	}
 
 	if ctx != nil {

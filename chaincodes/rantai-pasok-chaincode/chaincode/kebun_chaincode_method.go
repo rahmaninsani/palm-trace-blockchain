@@ -22,17 +22,30 @@ func (c *RantaiPasokChaincodeImpl) KebunCreate(ctx contractapi.TransactionContex
 	}
 
 	kebun := domain.Kebun{
-		Id:             kebunCreateRequest.Id,
-		AssetType:      constant.AssetTypeKebun,
-		IdPetani:       kebunCreateRequest.IdPetani,
-		Alamat:         kebunCreateRequest.Alamat,
-		Latitude:       kebunCreateRequest.Latitude,
-		Longitude:      kebunCreateRequest.Longitude,
-		Luas:           kebunCreateRequest.Luas,
-		NomorRspo:      kebunCreateRequest.NomorRspo,
-		SertifikatRspo: kebunCreateRequest.SertifikatRspo,
-		CreatedAt:      kebunCreateRequest.CreatedAt,
-		UpdatedAt:      kebunCreateRequest.UpdatedAt,
+		Id:                            kebunCreateRequest.Id,
+		AssetType:                     constant.AssetTypeKebun,
+		IdPetani:                      kebunCreateRequest.IdPetani,
+		Alamat:                        kebunCreateRequest.Alamat,
+		Latitude:                      kebunCreateRequest.Latitude,
+		Longitude:                     kebunCreateRequest.Longitude,
+		Luas:                          kebunCreateRequest.Luas,
+		KemampuanProduksiHarian:       kebunCreateRequest.KemampuanProduksiHarian,
+		NomorSuratKeteranganLurah:     kebunCreateRequest.NomorSuratKeteranganLurah,
+		CidSuratKeteranganLurah:       kebunCreateRequest.CidSuratKeteranganLurah,
+		NomorSuratKeteranganGantiRugi: kebunCreateRequest.NomorSuratKeteranganGantiRugi,
+		CidSuratKeteranganGantiRugi:   kebunCreateRequest.CidSuratKeteranganGantiRugi,
+		NomorSertifikatHakMilik:       kebunCreateRequest.NomorSertifikatHakMilik,
+		CidSertifikatHakMilik:         kebunCreateRequest.CidSertifikatHakMilik,
+		NomorSuratTandaBudidaya:       kebunCreateRequest.NomorSuratTandaBudidaya,
+		CidSuratTandaBudidaya:         kebunCreateRequest.CidSuratTandaBudidaya,
+		NomorSertifikatRspo:           kebunCreateRequest.NomorSertifikatRspo,
+		CidSertifikatRspo:             kebunCreateRequest.CidSertifikatRspo,
+		NomorSertifikatIspo:           kebunCreateRequest.NomorSertifikatIspo,
+		CidSertifikatIspo:             kebunCreateRequest.CidSertifikatIspo,
+		NomorSertifikatIscc:           kebunCreateRequest.NomorSertifikatIscc,
+		CidSertifikatIscc:             kebunCreateRequest.CidSertifikatIscc,
+		CreatedAt:                     kebunCreateRequest.CreatedAt,
+		UpdatedAt:                     kebunCreateRequest.UpdatedAt,
 	}
 
 	kebunJSON, err := json.Marshal(kebun)
@@ -77,8 +90,21 @@ func (c *RantaiPasokChaincodeImpl) KebunUpdate(ctx contractapi.TransactionContex
 	kebun.Latitude = kebunUpdateRequest.Latitude
 	kebun.Longitude = kebunUpdateRequest.Longitude
 	kebun.Luas = kebunUpdateRequest.Luas
-	kebun.NomorRspo = kebunUpdateRequest.NomorRspo
-	kebun.SertifikatRspo = kebunUpdateRequest.SertifikatRspo
+	kebun.KemampuanProduksiHarian = kebunUpdateRequest.KemampuanProduksiHarian
+	kebun.NomorSuratKeteranganLurah = kebunUpdateRequest.NomorSuratKeteranganLurah
+	kebun.CidSuratKeteranganLurah = kebunUpdateRequest.CidSuratKeteranganLurah
+	kebun.NomorSuratKeteranganGantiRugi = kebunUpdateRequest.NomorSuratKeteranganGantiRugi
+	kebun.CidSuratKeteranganGantiRugi = kebunUpdateRequest.CidSuratKeteranganGantiRugi
+	kebun.NomorSertifikatHakMilik = kebunUpdateRequest.NomorSertifikatHakMilik
+	kebun.CidSertifikatHakMilik = kebunUpdateRequest.CidSertifikatHakMilik
+	kebun.NomorSuratTandaBudidaya = kebunUpdateRequest.NomorSuratTandaBudidaya
+	kebun.CidSuratTandaBudidaya = kebunUpdateRequest.CidSuratTandaBudidaya
+	kebun.NomorSertifikatRspo = kebunUpdateRequest.NomorSertifikatRspo
+	kebun.CidSertifikatRspo = kebunUpdateRequest.CidSertifikatRspo
+	kebun.NomorSertifikatIspo = kebunUpdateRequest.NomorSertifikatIspo
+	kebun.CidSertifikatIspo = kebunUpdateRequest.CidSertifikatIspo
+	kebun.NomorSertifikatIscc = kebunUpdateRequest.NomorSertifikatIscc
+	kebun.CidSertifikatIscc = kebunUpdateRequest.CidSertifikatIscc
 	kebun.UpdatedAt = kebunUpdateRequest.UpdatedAt
 
 	kebunJSON, err := json.Marshal(kebun)

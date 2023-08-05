@@ -22,16 +22,17 @@ func (c *RantaiPasokChaincodeImpl) PembayaranCreate(ctx contractapi.TransactionC
 	}
 
 	pembayaran := domain.Pembayaran{
-		Id:          pembayaranCreateRequest.Id,
-		AssetType:   constant.AssetTypePembayaran,
-		IdTransaksi: pembayaranCreateRequest.IdTransaksi,
-		JenisUser:   pembayaranCreateRequest.JenisUser,
-		Nomor:       pembayaranCreateRequest.Nomor,
-		Tanggal:     pembayaranCreateRequest.Tanggal,
-		JumlahBayar: pembayaranCreateRequest.JumlahBayar,
-		HashBukti:   pembayaranCreateRequest.HashBukti,
-		CreatedAt:   pembayaranCreateRequest.CreatedAt,
-		UpdatedAt:   pembayaranCreateRequest.UpdatedAt,
+		Id:                    pembayaranCreateRequest.Id,
+		AssetType:             constant.AssetTypePembayaran,
+		IdTransaksi:           pembayaranCreateRequest.IdTransaksi,
+		JenisUser:             pembayaranCreateRequest.JenisUser,
+		Nomor:                 pembayaranCreateRequest.Nomor,
+		Tanggal:               pembayaranCreateRequest.Tanggal,
+		NomorRekeningPengirim: pembayaranCreateRequest.NomorRekeningPengirim,
+		NomorRekeningPenerima: pembayaranCreateRequest.NomorRekeningPenerima,
+		CidBuktiPembayaran:    pembayaranCreateRequest.CidBuktiPembayaran,
+		CreatedAt:             pembayaranCreateRequest.CreatedAt,
+		UpdatedAt:             pembayaranCreateRequest.UpdatedAt,
 	}
 
 	pembayaranJSON, err := json.Marshal(pembayaran)
