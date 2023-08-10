@@ -6,6 +6,7 @@ type PembayaranCreateRequest struct {
 	JenisUser             string `json:"jenisUser"`
 	Nomor                 string `json:"nomor"`
 	Tanggal               string `json:"tanggal"`
+	JumlahPembayaran      string `json:"jumlahPembayaran"`
 	NamaBankPengirim      string `json:"namaBankPengirim"`
 	NomorRekeningPengirim string `json:"nomorRekeningPengirim"`
 	NamaPengirim          string `json:"namaPengirim"`

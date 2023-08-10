@@ -28,6 +28,7 @@ func (c *RantaiPasokChaincodeImpl) PembayaranCreate(ctx contractapi.TransactionC
 		JenisUser:             pembayaranCreateRequest.JenisUser,
 		Nomor:                 pembayaranCreateRequest.Nomor,
 		Tanggal:               pembayaranCreateRequest.Tanggal,
+		JumlahPembayaran:      pembayaranCreateRequest.JumlahPembayaran,
 		NamaBankPengirim:      pembayaranCreateRequest.NamaBankPengirim,
 		NomorRekeningPengirim: pembayaranCreateRequest.NomorRekeningPengirim,
 		NamaPengirim:          pembayaranCreateRequest.NamaPengirim,

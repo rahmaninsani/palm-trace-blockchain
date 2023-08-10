@@ -231,6 +231,7 @@ func ToPembayaranResponse(ctx contractapi.TransactionContextInterface, keyModifi
 		JenisUser:             pembayaran.JenisUser,
 		Nomor:                 pembayaran.Nomor,
 		Tanggal:               pembayaran.Tanggal,
+		JumlahPembayaran:      pembayaran.JumlahPembayaran,
 		NamaBankPengirim:      pembayaran.NamaBankPengirim,
 		NomorRekeningPengirim: pembayaran.NomorRekeningPengirim,
 		NamaPengirim:          pembayaran.NamaPengirim,
